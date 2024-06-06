@@ -1,0 +1,200 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <!-- Table: ROLES -->
+    <changeSet author="your_name" id="create-table-ROLES">
+        <createTable tableName="ROLES">
+            <column name="ROLE_ID" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="ROLE_NAME" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Table: USER_INFO -->
+    <changeSet author="your_name" id="create-table-USER_INFO">
+        <createTable tableName="USER_INFO">
+            <column name="USER_ID" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="ADDRESS" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="REGISTER_DATE" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="DISCOUNT_POINTS" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Table: USERS -->
+    <changeSet author="your_name" id="create-table-USERS">
+        <createTable tableName="USERS">
+            <column name="USER_ID" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="USERNAME" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="EMAIL" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="PASSWORD" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PHONE_NUMBER" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ROLE_ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Table: BUSINESS -->
+    <changeSet author="your_name" id="create-table-BUSINESS">
+        <createTable tableName="BUSINESS">
+            <column name="BUSINESS_ID" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="BUSINESS_NAME" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="FREE_PARKING" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="FREE_WIFI" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="INSIDE_POOL" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="FREE_BREAKFAST" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ADMIN_ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Table: ROOM -->
+    <changeSet author="your_name" id="create-table-ROOM">
+        <createTable tableName="ROOM">
+            <column name="ROOM_ID" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="ROOM_NAME" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CAPACITY" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PRICE" type="DOUBLE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="DESCRIPTION" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ROOM_TYPE" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="IMAGE" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="BUSINESS_ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Table: ROOM_PRICING -->
+    <changeSet author="your_name" id="create-table-ROOM_PRICING">
+        <createTable tableName="ROOM_PRICING">
+            <column name="ROOM_PRICING_ID" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="DAY_OF_WEEK" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PRICE" type="DOUBLE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ROOM_ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Table: BOOKING -->
+    <changeSet author="your_name" id="create-table-BOOKING">
+        <createTable tableName="BOOKING">
+            <column name="BOOKING_ID" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="BOOKING_DATE" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CHECK_IN_DATE" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CHECK_OUT_DATE" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="NO_OF_ADULTS" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="NO_OF_CHILDREN" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="STATUS" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="USER_ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ROOM_ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="your_name" id="create-table-PAYMENT">
+        <createTable tableName="PAYMENT">
+            <column name="PAYMENT_ID" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="CARD_NUMBER" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CARD_HOLDER_NAME" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="EXPIRATION_YEAR" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="EXPIRATION_MONTH" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CVC" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="AMOUNT" type="DOUBLE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PAYMENT_DATE" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="BOOKING_ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>
+
