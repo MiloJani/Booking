@@ -55,6 +55,7 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
+        <addForeignKeyConstraint baseTableName="USERS" baseColumnNames="ROLE_ID" constraintName="FK_USERS_ROLE_ID" referencedTableName="ROLES" referencedColumnNames="ROLE_ID"/>
     </changeSet>
 
     <!-- Table: BUSINESS -->
@@ -78,10 +79,17 @@
             <column name="FREE_BREAKFAST" type="BOOLEAN">
                 <constraints nullable="false"/>
             </column>
+            <column name="IMAGE" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="TAX" type="DOUBLE">
+                <constraints nullable="false"/>
+            </column>
             <column name="ADMIN_ID" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
         </createTable>
+        <addForeignKeyConstraint baseTableName="BUSINESS" baseColumnNames="ADMIN_ID" constraintName="FK_BUSINESS_ADMIN_ID" referencedTableName="USERS" referencedColumnNames="USER_ID"/>
     </changeSet>
 
     <!-- Table: ROOM -->
@@ -112,6 +120,7 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
+        <addForeignKeyConstraint baseTableName="ROOM" baseColumnNames="BUSINESS_ID" constraintName="FK_ROOM_BUSINESS_ID" referencedTableName="BUSINESS" referencedColumnNames="BUSINESS_ID"/>
     </changeSet>
 
     <!-- Table: ROOM_PRICING -->
@@ -130,6 +139,7 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
+        <addForeignKeyConstraint baseTableName="ROOM_PRICING" baseColumnNames="ROOM_ID" constraintName="FK_ROOM_PRICING_ROOM_ID" referencedTableName="ROOM" referencedColumnNames="ROOM_ID"/>
     </changeSet>
 
     <!-- Table: BOOKING -->
@@ -163,8 +173,11 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
+        <addForeignKeyConstraint baseTableName="BOOKING" baseColumnNames="USER_ID" constraintName="FK_BOOKING_USER_ID" referencedTableName="USERS" referencedColumnNames="USER_ID"/>
+        <addForeignKeyConstraint baseTableName="BOOKING" baseColumnNames="ROOM_ID" constraintName="FK_BOOKING_ROOM_ID" referencedTableName="ROOM" referencedColumnNames="ROOM_ID"/>
     </changeSet>
 
+    <!-- Table: PAYMENT -->
     <changeSet author="your_name" id="create-table-PAYMENT">
         <createTable tableName="PAYMENT">
             <column name="PAYMENT_ID" type="BIGINT" autoIncrement="true">
@@ -182,19 +195,13 @@
             <column name="EXPIRATION_MONTH" type="INTEGER">
                 <constraints nullable="false"/>
             </column>
-            <column name="CVC" type="INTEGER">
-                <constraints nullable="false"/>
-            </column>
-            <column name="AMOUNT" type="DOUBLE">
-                <constraints nullable="false"/>
-            </column>
-            <column name="PAYMENT_DATE" type="DATE">
+            <column name="CVV" type="INTEGER">
                 <constraints nullable="false"/>
             </column>
             <column name="BOOKING_ID" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
         </createTable>
+        <addForeignKeyConstraint baseTableName="PAYMENT" baseColumnNames="BOOKING_ID" constraintName="FK_PAYMENT_BOOKING_ID" referencedTableName="BOOKING" referencedColumnNames="BOOKING_ID"/>
     </changeSet>
 </databaseChangeLog>
-

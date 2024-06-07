@@ -35,8 +35,11 @@ public class Businesses {
     @Column(name = "FREE_BREAKFAST",nullable = false)
     private boolean freeBreakfast;
 
-//    @Column(name = "IMAGE",nullable = false)
-//    private String image;
+    @Column(name = "IMAGE",nullable = false)
+    private String image;
+
+    @Column(name = "TAX",nullable = false)
+    private Double tax=0.07;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "adminId")
