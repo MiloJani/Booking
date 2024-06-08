@@ -27,9 +27,9 @@ public class UserInfo {
     @Column(name = "ADDRESS", nullable = false)
     private String address;
 
-    @Column(name = "REGISTER_DATE", nullable = false, unique = true)
+    @Column(name = "REGISTER_DATE", nullable = false)
     private LocalDate registerDate;
 
-    @Column(name = "DISCOUNT_POINTS", nullable = false, unique = true)
+    @Column(name = "DISCOUNT_POINTS", nullable = false)
     private int discountPoints;
 }
