@@ -11,7 +11,7 @@ public class ResponseRoomDTO {
 
     private String roomName;
 
-    private String capacity;
+    private Integer capacity;
 
     private Double price;
 

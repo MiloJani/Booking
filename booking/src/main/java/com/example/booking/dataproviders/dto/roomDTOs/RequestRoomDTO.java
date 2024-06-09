@@ -14,7 +14,7 @@ public class RequestRoomDTO {
 
     private String roomName;
 
-    private String capacity;
+    private Integer capacity;
 
     private Double price;
 

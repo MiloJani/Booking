@@ -20,6 +20,7 @@ public class RoomPricing {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "DAY_OF_WEEK", nullable = false)
     private DayOfWeek dayOfWeek;
 

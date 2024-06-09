@@ -37,16 +37,16 @@ public class Payment {
 
     @Column(name = "EXPIRATION_YEAR")
     @Min(value = 2024, message = "Expiration year must be greater than or equal to 2022")
-    private int expirationYear;
+    private Integer expirationYear;
 
     @Column(name = "EXPIRATION_MONTH")
     @Min(value = 1, message = "Expiration month must be between 1 and 12")
     @Max(value = 12, message = "Expiration month must be between 1 and 12")
-    private int expirationMonth;
+    private Integer expirationMonth;
 
     @Column(name = "CVV")
     @PositiveOrZero(message = "CVV must be a positive number or zero")
-    private int cvv;
+    private Integer cvv;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bookingId")

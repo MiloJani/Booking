@@ -24,7 +24,7 @@ public class Rooms {
     private String roomName;
 
     @Column(name = "CAPACITY",nullable = false)
-    private String capacity;
+    private Integer capacity;
 
     @Column(name = "PRICE",nullable = false)
     private Double price;
