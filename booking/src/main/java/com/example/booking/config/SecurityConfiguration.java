@@ -39,9 +39,20 @@ public class SecurityConfiguration {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(POST,"api/auth/**").permitAll()
-                        .requestMatchers(POST,"api/businesses/save").hasAuthority("ADMIN")
-                        .requestMatchers(PUT,"api/businesses/update/").hasAuthority("ADMIN")
+                        .requestMatchers(GET,"/api/booking/findAll","/api/booking/findById/"
+                                ,"/api/userInfo/findById/").hasAuthority("USER")
+                        .requestMatchers(GET,"/api/businesses/findAll","/api/businesses/findById/"
+                                , "/api/rooms/findAll","/api/rooms/findById/"
+                                ,"/api/roomPricing/findAll","/api/roomPricing/findById/").permitAll()
+                        .requestMatchers(POST,"/api/auth/authenticate").permitAll()
+                        .requestMatchers(POST,"/api/auth/save","/api/booking/save").hasAuthority("USER")
+                        .requestMatchers(POST,"/api/auth/saveAdmin","/api/businesses/save"
+                                ,"/api/businesses/save","/api/rooms/save","/api/roomPricing/save").hasAuthority("ADMIN")
+                        .requestMatchers(PUT,"/api/businesses/update/","/api/rooms/update/"
+                                ,"/api/roomPricing/update/").hasAuthority("ADMIN")
+                        .requestMatchers(DELETE,"/api/booking/delete/").hasAuthority("USER")
+                        .requestMatchers(DELETE,"/api/businesses/delete/","/api/rooms/delete/"
+                                ,"/api/roomPricing/update/").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/swagger-ui/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/v3/api-docs/**").permitAll()
                         .requestMatchers("/api-docs/**").permitAll()

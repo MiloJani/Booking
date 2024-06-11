@@ -5,6 +5,7 @@ import com.example.booking.dataproviders.dto.businessDTOs.ResponseBusinessDTO;
 import com.example.booking.dataproviders.dto.roomDTOs.RequestRoomDTO;
 import com.example.booking.dataproviders.dto.roomDTOs.ResponseRoomDTO;
 import com.example.booking.dataproviders.services.RoomService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @RestController
 @RequestMapping("/api/rooms")
+@SecurityRequirement(name = "Bearer authentication")
 public class RoomController {
 
     private RoomService roomService;
@@ -37,12 +39,12 @@ public class RoomController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<ResponseRoomDTO> updateBusiness(@Valid @RequestBody RequestRoomDTO requestRoomDTO, @PathVariable Long id) {
+    public ResponseEntity<ResponseRoomDTO> updateRoom(@Valid @RequestBody RequestRoomDTO requestRoomDTO, @PathVariable Long id) {
         return ResponseEntity.ok(roomService.updateRoom(requestRoomDTO,id));
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> deleteBusiness(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteRoom(@PathVariable Long id) {
         roomService.deleteRoom(id);
         return ResponseEntity.ok().build();
     }

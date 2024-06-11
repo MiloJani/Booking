@@ -5,6 +5,7 @@ import com.example.booking.dataproviders.dto.userDTOs.RequestUserDTO;
 import com.example.booking.dataproviders.dto.userDTOs.ResponseAdminDTO;
 import com.example.booking.dataproviders.dto.userDTOs.ResponseUserDTO;
 import com.example.booking.dataproviders.services.UserService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,7 @@ import java.util.List;
 
 @AllArgsConstructor
 @RestController
+@SecurityRequirement(name = "Bearer authentication")
 @RequestMapping("/api/users")
 //@Tag(
 //        name = "CRUD REST APIs for User Resource"

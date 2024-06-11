@@ -3,6 +3,7 @@ package com.example.booking.endpoints;
 import com.example.booking.dataproviders.dto.userDTOs.ResponseUserDTO;
 import com.example.booking.dataproviders.dto.userInfoDTOs.ResponseUserInfoDTO;
 import com.example.booking.dataproviders.services.UserInfoService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @AllArgsConstructor
 @RestController
+@SecurityRequirement(name = "Bearer authentication")
 @RequestMapping("/api/userInfo")
 public class UserInfoController {
 

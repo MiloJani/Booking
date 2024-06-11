@@ -14,6 +14,7 @@ import java.util.List;
 
 @AllArgsConstructor
 @RestController
+@SecurityRequirement(name = "Bearer authentication")
 @RequestMapping("/api/businesses")
 public class BusinessController {
 
@@ -31,7 +32,6 @@ public class BusinessController {
     }
 
     @PostMapping("/save")
-    @SecurityRequirement(name = "Bearer authentication")
     public ResponseEntity<ResponseBusinessDTO> saveBusiness(@Valid @RequestBody RequestBusinessDTO requestBusinessDTO) {
         return new ResponseEntity<>(businessService.saveBusiness(requestBusinessDTO), HttpStatus.CREATED);
     }

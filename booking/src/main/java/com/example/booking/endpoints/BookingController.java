@@ -5,6 +5,7 @@ import com.example.booking.dataproviders.dto.bookingDTOs.ResponseBookingDTO;
 import com.example.booking.dataproviders.dto.businessDTOs.RequestBusinessDTO;
 import com.example.booking.dataproviders.dto.businessDTOs.ResponseBusinessDTO;
 import com.example.booking.dataproviders.services.BookingService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,7 @@ import java.util.List;
 
 @AllArgsConstructor
 @RestController
+@SecurityRequirement(name = "Bearer authentication")
 @RequestMapping("/api/booking")
 public class BookingController {
 
@@ -32,7 +34,7 @@ public class BookingController {
     }
 
     @PostMapping("/save")
-    public ResponseEntity<ResponseBookingDTO> saveBusiness(@Valid @RequestBody RequestBookingDTO requestBookingDTO) {
+    public ResponseEntity<ResponseBookingDTO> saveBooking(@Valid @RequestBody RequestBookingDTO requestBookingDTO) {
         return new ResponseEntity<>(bookingService.saveBooking(requestBookingDTO), HttpStatus.CREATED);
     }
 
@@ -42,7 +44,7 @@ public class BookingController {
 //    }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> deleteBusiness(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteBooking(@PathVariable Long id) {
         bookingService.deleteBooking(id);
         return ResponseEntity.ok().build();
     }
