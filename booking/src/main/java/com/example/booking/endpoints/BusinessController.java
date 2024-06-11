@@ -3,6 +3,7 @@ package com.example.booking.endpoints;
 import com.example.booking.dataproviders.dto.businessDTOs.RequestBusinessDTO;
 import com.example.booking.dataproviders.dto.businessDTOs.ResponseBusinessDTO;
 import com.example.booking.dataproviders.services.BusinessService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -30,6 +31,7 @@ public class BusinessController {
     }
 
     @PostMapping("/save")
+    @SecurityRequirement(name = "Bearer authentication")
     public ResponseEntity<ResponseBusinessDTO> saveBusiness(@Valid @RequestBody RequestBusinessDTO requestBusinessDTO) {
         return new ResponseEntity<>(businessService.saveBusiness(requestBusinessDTO), HttpStatus.CREATED);
     }

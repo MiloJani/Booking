@@ -6,19 +6,21 @@ import com.example.booking.dataproviders.dto.userDTOs.ResponseAdminDTO;
 import com.example.booking.dataproviders.dto.userDTOs.ResponseUserDTO;
 import com.example.booking.dataproviders.entities.User;
 import lombok.AllArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @AllArgsConstructor
 @Component
 public class AdminMapper {
 
+    private PasswordEncoder passwordEncoder;
     public ResponseAdminDTO mapToDto(User user) {
 
         ResponseAdminDTO dto = new ResponseAdminDTO();
         dto.setUserId(user.getUserId());
         dto.setUsername(user.getUsername());
         dto.setEmail(user.getEmail());
-        dto.setPassword(user.getPassword());
+        dto.setPassword(passwordEncoder.encode(user.getPassword()));
         dto.setPhoneNumber(user.getPhoneNumber());
         dto.setRoleId(user.getRole().getId());
         return dto;
@@ -29,7 +31,7 @@ public class AdminMapper {
         User user = new User();
         user.setUsername(requestAdminDTO.getUsername());
         user.setEmail(requestAdminDTO.getEmail());
-        user.setPassword(requestAdminDTO.getPassword());
+        user.setPassword(passwordEncoder.encode(requestAdminDTO.getPassword()));
         user.setPhoneNumber(requestAdminDTO.getPhoneNumber());
 
         return user;
