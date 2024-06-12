@@ -2,14 +2,13 @@ package com.example.booking.dataproviders.dto.authDTOs;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Setter
 @Getter
-public class AuthenticationRequest {
+public class LogoutDTO {
 
-    private String email;
-    String password;
+    private String token;
 }
-

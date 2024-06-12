@@ -1,5 +1,6 @@
 package com.example.booking.dataproviders.services.impl;
 
+import com.example.booking.core.exceptions.RecordNotFoundException;
 import com.example.booking.dataproviders.dto.bookingDTOs.RequestBookingDTO;
 import com.example.booking.dataproviders.dto.businessDTOs.RequestBusinessDTO;
 import com.example.booking.dataproviders.dto.businessDTOs.ResponseBusinessDTO;
@@ -39,7 +40,7 @@ public class BusinessServiceImpl implements BusinessService {
     @Override
     public ResponseBusinessDTO findBusinessById(Long id) {
 
-        Businesses business = businessRepository.findById(id).orElseThrow(() -> new RuntimeException("Business not found"));
+        Businesses business = businessRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("Business not found"));
 
         return businessMapper.mapToDto(business);
     }
@@ -48,7 +49,7 @@ public class BusinessServiceImpl implements BusinessService {
     public ResponseBusinessDTO saveBusiness(RequestBusinessDTO requestBusinessDTO) {
 
         Businesses businesses = businessMapper.mapToEntity(requestBusinessDTO);
-        User user = userRepository.findById(requestBusinessDTO.getAdminId()).orElseThrow(() -> new RuntimeException("Admin not found"));
+        User user = userRepository.findById(requestBusinessDTO.getAdminId()).orElseThrow(() -> new RecordNotFoundException("Admin not found"));
 
         if (user.getRole().getRoleName().equals("ADMIN")){
             businesses.setAdmin(user);
@@ -63,7 +64,7 @@ public class BusinessServiceImpl implements BusinessService {
     @Override
     public ResponseBusinessDTO updateBusiness(RequestBusinessDTO requestBusinessDTO, Long id) {
 
-        Businesses foundBusiness = businessRepository.findById(id).orElseThrow(() -> new RuntimeException("Business not found"));
+        Businesses foundBusiness = businessRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("Business not found"));
 
         foundBusiness.setBusinessName(requestBusinessDTO.getBusinessName());
         foundBusiness.setFreeBreakfast(requestBusinessDTO.isFreeBreakfast());

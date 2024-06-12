@@ -15,6 +15,7 @@ public class UserInfoMapper {
         ResponseUserInfoDTO dto = new ResponseUserInfoDTO();
         dto.setUserId(userInfo.getUserId());
         dto.setAddress(userInfo.getAddress());
+        dto.setFullName(userInfo.getFullName());
         dto.setRegistrationDate(userInfo.getRegisterDate());
         return dto;
     }
@@ -23,6 +24,7 @@ public class UserInfoMapper {
 
         UserInfo userInfo = new UserInfo();
         userInfo.setAddress(requestUserInfoDTO.getAddress());
+        userInfo.setFullName(requestUserInfoDTO.getFullName());
         userInfo.setRegisterDate(requestUserInfoDTO.getRegistrationDate());
         return userInfo;
     }

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class PaymentMapper {
 
-    public static Payment mapToEntity(RequestPaymentDTO requestPaymentDTO) {
+    public  Payment mapToEntity(RequestPaymentDTO requestPaymentDTO) {
 
         Payment payment = new Payment();
         payment.setCardNumber(requestPaymentDTO.getCardNumber());
@@ -22,7 +22,7 @@ public class PaymentMapper {
         return payment;
     }
 
-    public static ResponsePaymentDTO mapToDto(Payment payment) {
+    public  ResponsePaymentDTO mapToDto(Payment payment) {
 
 
         ResponsePaymentDTO responsePaymentDTO = new ResponsePaymentDTO();

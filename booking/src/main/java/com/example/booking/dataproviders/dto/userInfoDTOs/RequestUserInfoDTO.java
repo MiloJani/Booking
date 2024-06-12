@@ -11,5 +11,7 @@ public class RequestUserInfoDTO {
 
     private String address;
 
+    private String fullName;
+
     private LocalDate registrationDate;
 }

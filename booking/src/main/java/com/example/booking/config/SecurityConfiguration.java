@@ -19,6 +19,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import static org.springframework.http.HttpMethod.*;
 import static org.springframework.http.HttpMethod.DELETE;
@@ -38,15 +44,19 @@ public class SecurityConfiguration {
 
         http
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(httpSecurityCorsConfigurer ->
+                        httpSecurityCorsConfigurer.configurationSource(request ->
+                                new CorsConfiguration().applyPermitDefaultValues()
+                        ))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(GET,"/api/booking/findAll","/api/booking/findById/"
                                 ,"/api/userInfo/findById/").hasAuthority("USER")
-                        .requestMatchers(GET,"/api/businesses/findAll","/api/businesses/findById/"
+                        .requestMatchers(GET,"/api/users/findAll","/api/businesses/findAll","/api/businesses/findById/"
                                 , "/api/rooms/findAll","/api/rooms/findById/"
                                 ,"/api/roomPricing/findAll","/api/roomPricing/findById/").permitAll()
-                        .requestMatchers(POST,"/api/auth/authenticate").permitAll()
-                        .requestMatchers(POST,"/api/auth/save","/api/booking/save").hasAuthority("USER")
-                        .requestMatchers(POST,"/api/auth/saveAdmin","/api/businesses/save"
+                        .requestMatchers(POST,"/api/auth/**").permitAll()
+                        .requestMatchers(POST,"/api/booking/save").hasAuthority("USER")
+                        .requestMatchers(POST,"/api/businesses/save"
                                 ,"/api/businesses/save","/api/rooms/save","/api/roomPricing/save").hasAuthority("ADMIN")
                         .requestMatchers(PUT,"/api/businesses/update/","/api/rooms/update/"
                                 ,"/api/roomPricing/update/").hasAuthority("ADMIN")
@@ -70,4 +80,45 @@ public class SecurityConfiguration {
 
         return http.build();
     }
+
+    @Bean
+    public CorsFilter corsFilter() {
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
+        corsConfiguration.addAllowedOrigin("http://192.168.1.78:3000");
+        corsConfiguration.addAllowedMethod("*");
+        corsConfiguration.addAllowedHeader("*");
+        corsConfiguration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", corsConfiguration);
+
+        return new CorsFilter(source);
+//        return new CorsFilter(corsConfigurationSource());
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.addAllowedOrigin("http://192.168.1.78:3000");
+        configuration.addAllowedMethod("*");
+        configuration.addAllowedHeader("*");
+        configuration.setAllowCredentials(true);
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+
+//    @Bean
+//    public WebMvcConfigurer corsConfigurer() {
+//        return new WebMvcConfigurer() {
+//            @Override
+//            public void addCorsMappings(CorsRegistry registry) {
+//                registry.addMapping("/**")
+//                        .allowedOrigins("http://192.168.1.78:3000")
+//                        .allowedMethods("*")
+//                        .allowedHeaders("*")
+//                        .allowCredentials(true);
+//            }
+//        };
+//    }
 }

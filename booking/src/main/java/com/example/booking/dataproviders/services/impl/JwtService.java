@@ -1,15 +1,20 @@
 package com.example.booking.dataproviders.services.impl;
 
+import com.example.booking.dataproviders.entities.TokenBlacklist;
+import com.example.booking.dataproviders.repositories.TokenBlacklistRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -17,11 +22,15 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Service
 public class JwtService {
 
 //    @Value("${jwt.secret}")
     private static final String SECRET_KEY = "8c08dad0d3a9462d9349eec543b7371700f6176abcc0332de6f9e43f2e2af5a7";
+
+
+    private final TokenBlacklistRepository tokenBlacklistRepository;
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -67,7 +76,7 @@ public class JwtService {
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+        return (username.equals(userDetails.getUsername())) && !isTokenExpired(token) && !isTokenBlacklisted(token);
     }
 
     private boolean isTokenExpired(String token) {
@@ -77,4 +86,24 @@ public class JwtService {
     private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
+
+    private boolean isTokenBlacklisted(String token) {
+        return tokenBlacklistRepository.existsByToken(token);
+    }
+
+    public void invalidateToken(String token) {
+        TokenBlacklist tokenBlacklist = new TokenBlacklist();
+        tokenBlacklist.setToken(token);
+        tokenBlacklist.setInvalidatedAt(LocalDateTime.now());
+        tokenBlacklistRepository.save(tokenBlacklist);
+    }
+
+//    public String invalidateToken(String token) {
+//        Claims claims = extractAllClaims(token);
+//        claims.setExpiration(new Date(0));
+//        return Jwts.builder()
+//                .setClaims(claims)
+//                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+//                .compact();
+//    }
 }

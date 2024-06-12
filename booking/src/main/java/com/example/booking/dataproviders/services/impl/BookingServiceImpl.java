@@ -1,5 +1,6 @@
 package com.example.booking.dataproviders.services.impl;
 
+import com.example.booking.core.exceptions.RecordNotFoundException;
 import com.example.booking.dataproviders.dto.bookingDTOs.RequestBookingDTO;
 import com.example.booking.dataproviders.dto.bookingDTOs.ResponseBookingDTO;
 import com.example.booking.dataproviders.entities.Booking;
@@ -10,10 +11,7 @@ import com.example.booking.dataproviders.mappers.BookingMapper;
 import com.example.booking.dataproviders.mappers.PaymentMapper;
 import com.example.booking.dataproviders.mappers.RoomMapper;
 import com.example.booking.dataproviders.mappers.UserMapper;
-import com.example.booking.dataproviders.repositories.BookingRepository;
-import com.example.booking.dataproviders.repositories.PaymentRepository;
-import com.example.booking.dataproviders.repositories.RoomRepository;
-import com.example.booking.dataproviders.repositories.UserRepository;
+import com.example.booking.dataproviders.repositories.*;
 import com.example.booking.dataproviders.services.BookingService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -31,6 +29,7 @@ public class BookingServiceImpl implements BookingService {
     private PaymentMapper paymentMapper;
     private UserRepository userRepository;
     private UserMapper userMapper;
+    private UserInfoRepository userInfoRepository;
     private RoomRepository roomRepository;
     private RoomMapper roomMapper;
 
@@ -48,7 +47,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public ResponseBookingDTO findBookingById(Long id) {
 
-        Booking booking = bookingRepository.findById(id).orElseThrow(() -> new RuntimeException("Booking not found"));
+        Booking booking = bookingRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("Booking not found"));
 
         return bookingMapper.mapToDto(booking);
     }
@@ -67,10 +66,13 @@ public class BookingServiceImpl implements BookingService {
             booking.setStatus("Checked Out");
         }
 
-        User user = userRepository.findById(requestBookingDTO.getUserId()).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findById(requestBookingDTO.getUserId()).orElseThrow(() -> new RecordNotFoundException("User not found"));
         booking.setUser(user);
+        int points = user.getUserInfo().getDiscountPoints()+3;
+        user.getUserInfo().setDiscountPoints(points);
+        userInfoRepository.save(user.getUserInfo());
 
-        Rooms room = roomRepository.findById(requestBookingDTO.getRoomId()).orElseThrow(() -> new RuntimeException("Room not found"));
+        Rooms room = roomRepository.findById(requestBookingDTO.getRoomId()).orElseThrow(() -> new RecordNotFoundException("Room not found"));
         booking.setRoom(room);
 
         Payment payment = paymentMapper.mapToEntity(requestBookingDTO.getRequestPaymentDTO());
@@ -89,7 +91,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public void deleteBooking(Long id) {
 
-        Booking booking = bookingRepository.findById(id).orElseThrow(() -> new RuntimeException("Booking not found"));
+        Booking booking = bookingRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("Booking not found"));
         bookingRepository.delete(booking);
 
     }

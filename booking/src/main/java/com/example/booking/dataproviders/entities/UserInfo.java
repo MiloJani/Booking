@@ -27,6 +27,9 @@ public class UserInfo {
     @Column(name = "ADDRESS", nullable = false)
     private String address;
 
+    @Column(name = "FULL_NAME",nullable = false)
+    private String fullName;
+
     @Column(name = "REGISTER_DATE", nullable = false)
     private LocalDate registerDate;
 

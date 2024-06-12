@@ -42,7 +42,7 @@ public class Booking {
     @JoinColumn(name = "userId")
     private User user;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "roomId")
     private Rooms room;
 

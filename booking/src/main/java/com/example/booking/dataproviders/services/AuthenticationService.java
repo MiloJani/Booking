@@ -11,4 +11,5 @@ public interface AuthenticationService {
     AuthenticationResponse authenticate(AuthenticationRequest authenticationRequest);
     ResponseUserDTO registerUser (RequestUserDTO requestUserDTO);
     ResponseAdminDTO registerAdmin (RequestAdminDTO requestAdminDTO);
+    String logout(String token);
 }

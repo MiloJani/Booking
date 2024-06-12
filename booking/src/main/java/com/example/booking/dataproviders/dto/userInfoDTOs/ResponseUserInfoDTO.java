@@ -13,5 +13,7 @@ public class ResponseUserInfoDTO {
 
     private String address;
 
+    private String fullName;
+
     private LocalDate registrationDate;
 }

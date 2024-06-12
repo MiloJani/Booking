@@ -1,5 +1,7 @@
 package com.example.booking.dataproviders.services.impl;
 
+import com.example.booking.core.exceptions.AuthenticationFailedException;
+import com.example.booking.core.exceptions.RecordNotFoundException;
 import com.example.booking.dataproviders.dto.authDTOs.AuthenticationRequest;
 import com.example.booking.dataproviders.dto.authDTOs.AuthenticationResponse;
 import com.example.booking.dataproviders.dto.userDTOs.RequestAdminDTO;
@@ -7,6 +9,8 @@ import com.example.booking.dataproviders.dto.userDTOs.RequestUserDTO;
 import com.example.booking.dataproviders.dto.userDTOs.ResponseAdminDTO;
 import com.example.booking.dataproviders.dto.userDTOs.ResponseUserDTO;
 import com.example.booking.dataproviders.entities.Role;
+import com.example.booking.dataproviders.entities.User;
+import com.example.booking.dataproviders.repositories.BookingRepository;
 import com.example.booking.dataproviders.repositories.RoleRepository;
 import com.example.booking.dataproviders.repositories.UserRepository;
 import com.example.booking.dataproviders.services.AuthenticationService;
@@ -23,6 +27,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,6 +36,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final UserRepository userRepository;
     private final UserService userService;
+    private final BookingRepository bookingRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
@@ -42,15 +48,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            request.getEmailOrPhoneNumber(),
+                            request.getEmail(),
                             request.getPassword()
                     )
             );
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            UserDetails userDetails = userDetailsService.loadUserByUsername(request.getEmailOrPhoneNumber());
+            UserDetails userDetails = userDetailsService.loadUserByUsername(request.getEmail());
 
             if (userDetails == null) {
-                throw new RuntimeException("User not found");
+                throw new RecordNotFoundException("User not found");
             }
 
             var jwtToken = jwtService.generateToken(userDetails);
@@ -59,12 +65,31 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                     .findFirst()
                     .orElseThrow(() -> new RuntimeException("User has no roles assigned"));
 
+
+
+            if (Objects.equals(roleName, "USER")){
+
+            User user = userRepository.findUserByUsername(userDetails.getUsername()).orElseThrow(() -> new RuntimeException("User not found"));
             AuthenticationResponse authenticationResponse = new AuthenticationResponse();
             authenticationResponse.setToken(jwtToken);
+            authenticationResponse.setFullName(user.getUserInfo().getFullName());
+            authenticationResponse.setPoints(user.getUserInfo().getDiscountPoints());
+            authenticationResponse.setBooks(bookingRepository.countByUser(user));
             authenticationResponse.setRoleName(roleName);
             return authenticationResponse;
+            }
+            else if (Objects.equals(roleName, "ADMIN")){
+                AuthenticationResponse authenticationResponse = new AuthenticationResponse();
+                authenticationResponse.setToken(jwtToken);
+                authenticationResponse.setFullName("ADMIN");
+                authenticationResponse.setRoleName(roleName);
+                return authenticationResponse;
+            }
+            else {
+                throw new RuntimeException("User has no roles assigned");
+            }
         } catch (Exception e) {
-            throw new RuntimeException("Authentication failed for user: " + request.getEmailOrPhoneNumber());
+            throw new AuthenticationFailedException("User could not login");
         }
     }
 
@@ -77,4 +102,17 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public ResponseAdminDTO registerAdmin(RequestAdminDTO requestAdminDTO) {
         return userService.saveAdmin(requestAdminDTO);
     }
+
+    @Override
+    public String logout(String token) {
+        jwtService.invalidateToken(token);
+        //        SecurityContextHolder.clearContext();
+        return "Logout successful";
+    }
+
+//    @Override
+//    public void logout(String token) {
+//        String invalidatedToken = jwtService.invalidateToken(token);
+//        SecurityContextHolder.clearContext();
+//    }
 }

@@ -1,5 +1,6 @@
 package com.example.booking.config;
 
+import com.example.booking.core.exceptions.TokenInvalidException;
 import com.example.booking.dataproviders.entities.User;
 import com.example.booking.dataproviders.services.impl.JwtService;
 import lombok.RequiredArgsConstructor;
@@ -50,6 +51,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         new WebAuthenticationDetailsSource().buildDetails(request)
                 );
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+            }else {
+                throw new TokenInvalidException("Token is invalid");
+//                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+//                return;
             }
 
         }
