@@ -50,8 +50,8 @@ public class BusinessMapper {
         businesses.setFreeParking(requestBusinessDTO.isFreeParking());
         businesses.setFreeWifi(requestBusinessDTO.isFreeWifi());
         businesses.setInsidePool(requestBusinessDTO.isInsidePool());
-        businesses.setTax(requestBusinessDTO.getTax());
-        businesses.setImage(requestBusinessDTO.getImage());
+//        businesses.setTax(requestBusinessDTO.getTax());
+//        businesses.setImage(requestBusinessDTO.getImage());
 
         return businesses;
     }

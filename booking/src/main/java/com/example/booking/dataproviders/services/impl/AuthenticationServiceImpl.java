@@ -64,7 +64,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             String roleName = userDetails.getAuthorities().stream()
                     .map(authority -> authority.getAuthority())
                     .findFirst()
-                    .orElseThrow(() -> new RuntimeException("User has no roles assigned"));
+                    .orElseThrow(() -> new AuthenticationFailedException("User has no roles assigned"));
 
 
 
@@ -87,7 +87,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 return authenticationResponse;
             }
             else {
-                throw new RuntimeException("User has no roles assigned");
+                throw new AuthenticationFailedException("User has no roles assigned");
             }
         } catch (Exception e) {
             throw new AuthenticationFailedException("User could not login");
