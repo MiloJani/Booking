@@ -10,6 +10,7 @@ import com.example.booking.dataproviders.mappers.BusinessMapper;
 import com.example.booking.dataproviders.repositories.BusinessRepository;
 import com.example.booking.dataproviders.repositories.UserRepository;
 import com.example.booking.dataproviders.services.BusinessService;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -46,6 +47,7 @@ public class BusinessServiceImpl implements BusinessService {
     }
 
     @Override
+    @Transactional
     public ResponseBusinessDTO saveBusiness(RequestBusinessDTO requestBusinessDTO) {
 
         Businesses businesses = businessMapper.mapToEntity(requestBusinessDTO);
@@ -58,6 +60,8 @@ public class BusinessServiceImpl implements BusinessService {
 
         Businesses savedBusiness = businessRepository.save(businesses);
 
+        //File file = new File("path/to/image/folder/" + fileName);
+        //file.transferTo(new File(filePath))
         return businessMapper.mapToDto(savedBusiness);
     }
 

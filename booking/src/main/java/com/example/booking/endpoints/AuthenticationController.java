@@ -3,6 +3,7 @@ package com.example.booking.endpoints;
 import com.example.booking.dataproviders.dto.authDTOs.AuthenticationRequest;
 import com.example.booking.dataproviders.dto.authDTOs.AuthenticationResponse;
 import com.example.booking.dataproviders.dto.authDTOs.LogoutDTO;
+import com.example.booking.dataproviders.dto.authDTOs.ResponseLogoutDTO;
 import com.example.booking.dataproviders.dto.userDTOs.RequestAdminDTO;
 import com.example.booking.dataproviders.dto.userDTOs.RequestUserDTO;
 import com.example.booking.dataproviders.dto.userDTOs.ResponseAdminDTO;
@@ -17,7 +18,8 @@ import org.springframework.web.bind.annotation.*;
 
 @AllArgsConstructor
 @RestController
-@CrossOrigin(origins = "http://192.168.1.78:3000")
+//@CrossOrigin(origins = "http://192.168.1.78:3000")
+@CrossOrigin(origins = "http://192.168.1.66:3000")
 @SecurityRequirement(name = "Bearer authentication")
 @RequestMapping("/api/auth")
 public class AuthenticationController {
@@ -42,9 +44,9 @@ public class AuthenticationController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(@Valid @RequestBody LogoutDTO logoutDTO) {
-        String message = authenticationService.logout(logoutDTO.getToken());
-        return ResponseEntity.ok(message);
+    public ResponseEntity<ResponseLogoutDTO> logout(@Valid @RequestBody LogoutDTO logoutDTO) {
+        ResponseLogoutDTO responseLogoutDTO = authenticationService.logout(logoutDTO.getToken());
+        return ResponseEntity.ok(responseLogoutDTO);
     }
 //    @PostMapping("/logout")
 //    public ResponseEntity<Void> logout(@RequestBody String token) {

@@ -1,10 +1,5 @@
 package com.example.booking.dataproviders.dto.businessDTOs;
 
-import com.example.booking.dataproviders.entities.User;
-import jakarta.persistence.Column;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -22,7 +17,7 @@ public class RequestBusinessDTO {
 
     private boolean freeBreakfast;
 
-    private String image;
+    private String image; //Multipart
 
     private Double tax=0.07;
 

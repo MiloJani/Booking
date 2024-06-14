@@ -4,6 +4,7 @@ import com.example.booking.core.exceptions.AuthenticationFailedException;
 import com.example.booking.core.exceptions.RecordNotFoundException;
 import com.example.booking.dataproviders.dto.authDTOs.AuthenticationRequest;
 import com.example.booking.dataproviders.dto.authDTOs.AuthenticationResponse;
+import com.example.booking.dataproviders.dto.authDTOs.ResponseLogoutDTO;
 import com.example.booking.dataproviders.dto.userDTOs.RequestAdminDTO;
 import com.example.booking.dataproviders.dto.userDTOs.RequestUserDTO;
 import com.example.booking.dataproviders.dto.userDTOs.ResponseAdminDTO;
@@ -104,10 +105,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public String logout(String token) {
+    public ResponseLogoutDTO logout(String token) {
         jwtService.invalidateToken(token);
         //        SecurityContextHolder.clearContext();
-        return "Logout successful";
+        ResponseLogoutDTO responseLogoutDTO = new ResponseLogoutDTO();
+        responseLogoutDTO.setMessage("Logout succesfull");
+        return responseLogoutDTO;
     }
 
 //    @Override
