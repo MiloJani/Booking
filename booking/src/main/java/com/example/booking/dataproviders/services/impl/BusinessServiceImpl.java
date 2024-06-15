@@ -1,7 +1,6 @@
 package com.example.booking.dataproviders.services.impl;
 
 import com.example.booking.core.exceptions.AuthenticationFailedException;
-
 import com.example.booking.core.exceptions.RecordNotFoundException;
 import com.example.booking.dataproviders.dto.bookingDTOs.RequestBookingDTO;
 import com.example.booking.dataproviders.dto.businessDTOs.RequestBusinessDTO;
@@ -43,6 +42,12 @@ public class BusinessServiceImpl implements BusinessService {
 
         return responseBusinessDTOS;
     }
+
+    @Override
+    public List<String> findAllBusinessesOfAdmin() {
+        return List.of();
+    }
+
 
     @Override
     public ResponseBusinessDTO findBusinessById(Long id) {

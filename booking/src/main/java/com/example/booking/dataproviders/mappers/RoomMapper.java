@@ -31,7 +31,7 @@ public class RoomMapper {
         rooms.setCapacity(requestRoomDTO.getCapacity());
         rooms.setPrice(requestRoomDTO.getPrice());
         rooms.setDescription(requestRoomDTO.getDescription());
-        rooms.setImage(requestRoomDTO.getImage());
+//        rooms.setImage(requestRoomDTO.getImage());
         rooms.setRoomType(requestRoomDTO.getRoomType());
         return rooms;
     }

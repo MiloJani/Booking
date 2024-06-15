@@ -8,9 +8,13 @@ import com.example.booking.dataproviders.mappers.RoomMapper;
 import com.example.booking.dataproviders.repositories.BusinessRepository;
 import com.example.booking.dataproviders.repositories.RoomRepository;
 import com.example.booking.dataproviders.services.RoomService;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,11 +44,33 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public ResponseRoomDTO createRoom(RequestRoomDTO roomDTO) {
+    @Transactional
+    public ResponseRoomDTO createRoom(RequestRoomDTO roomDTO,String email) {
 
         Rooms rooms = roomMapper.mapToEntity(roomDTO);
 
-        Businesses businesses = businessRepository.findById(roomDTO.getBusinessId()).orElseThrow(() -> new RuntimeException("Business not found"));
+        Businesses businesses = businessRepository.findByBusinessName(roomDTO.getBusinessName()).orElseThrow(() -> new RuntimeException("Business not found"));
+
+        MultipartFile image = roomDTO.getImage();
+        if (image != null && !image.isEmpty()) {
+            if (image.getSize() > 100 * 1024) {
+                throw new RuntimeException("File size must be less than or equal to 100KB");
+            }
+            try {
+
+                String uploadDir = "C:\\Users\\USER\\Desktop\\BookingProject\\Booking\\booking\\src\\main\\resources\\images\\rooms\\";
+
+                String fileName = System.currentTimeMillis() + "_" + image.getOriginalFilename();
+
+                File file = new File(uploadDir + fileName);
+
+                image.transferTo(file);
+
+                rooms.setImage(fileName);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to save image file", e);
+            }
+        }
 
         rooms.setBusinesses(businesses);
 
@@ -62,7 +88,7 @@ public class RoomServiceImpl implements RoomService {
         foundRoom.setCapacity(requestRoomDTO.getCapacity());
         foundRoom.setPrice(requestRoomDTO.getPrice());
         foundRoom.setDescription(requestRoomDTO.getDescription());
-        foundRoom.setImage(requestRoomDTO.getImage());
+//        foundRoom.setImage(requestRoomDTO.getImage());
         foundRoom.setRoomType(requestRoomDTO.getRoomType());
 
         Rooms updatedRoom = roomRepository.save(foundRoom);

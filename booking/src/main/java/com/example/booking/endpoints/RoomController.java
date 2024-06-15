@@ -10,6 +10,8 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,8 +36,15 @@ public class RoomController {
     }
 
     @PostMapping("/save")
-    public ResponseEntity<ResponseRoomDTO> saveRoom(@Valid @RequestBody RequestRoomDTO requestRoomDTO) {
-        return new ResponseEntity<>(roomService.createRoom(requestRoomDTO), HttpStatus.CREATED);
+    public ResponseEntity<ResponseRoomDTO> saveRoom(@ModelAttribute RequestRoomDTO requestRoomDTO/*@Valid @RequestBody RequestRoomDTO requestRoomDTO*/) {
+        try {
+            SecurityContext context = SecurityContextHolder.getContext();
+            String userEmail = context.getAuthentication().getName();
+            return new ResponseEntity<>(roomService.createRoom(requestRoomDTO,userEmail), HttpStatus.CREATED);
+        }catch (RuntimeException ex){
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        }
+
     }
 
     @PutMapping("/update/{id}")

@@ -10,6 +10,8 @@ public interface BusinessService {
 
         List<ResponseBusinessDTO> findAllBusinesses();
 
+        List<String> findAllBusinessesOfAdmin();
+
         ResponseBusinessDTO findBusinessById(Long id);
 
         ResponseBusinessDTO saveBusiness(RequestBusinessDTO requestBusinessDTO,String email);

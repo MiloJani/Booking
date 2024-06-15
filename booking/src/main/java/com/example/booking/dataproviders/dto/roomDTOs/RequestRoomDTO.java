@@ -7,6 +7,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 @Setter
@@ -22,8 +23,8 @@ public class RequestRoomDTO {
 
     private String roomType;
 
-    private String image;
+    private MultipartFile image;
 
-    private Long businessId;
+    private String businessName;
 
 }
