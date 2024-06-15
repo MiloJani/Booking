@@ -1,12 +1,16 @@
 package com.example.booking.dataproviders.services.impl;
 
+import com.example.booking.core.exceptions.AuthenticationFailedException;
+import com.example.booking.core.exceptions.RecordNotFoundException;
 import com.example.booking.dataproviders.dto.roomDTOs.RequestRoomDTO;
 import com.example.booking.dataproviders.dto.roomDTOs.ResponseRoomDTO;
 import com.example.booking.dataproviders.entities.Businesses;
 import com.example.booking.dataproviders.entities.Rooms;
+import com.example.booking.dataproviders.entities.User;
 import com.example.booking.dataproviders.mappers.RoomMapper;
 import com.example.booking.dataproviders.repositories.BusinessRepository;
 import com.example.booking.dataproviders.repositories.RoomRepository;
+import com.example.booking.dataproviders.repositories.UserRepository;
 import com.example.booking.dataproviders.services.RoomService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -24,7 +28,10 @@ public class RoomServiceImpl implements RoomService {
 
     private RoomRepository roomRepository;
     private BusinessRepository businessRepository;
+    private UserRepository userRepository;
     private RoomMapper roomMapper;
+
+
     @Override
     public List<ResponseRoomDTO> findAllRooms() {
 
@@ -45,11 +52,18 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     @Transactional
-    public ResponseRoomDTO createRoom(RequestRoomDTO roomDTO,String email) {
+    public ResponseRoomDTO createRoom(RequestRoomDTO roomDTO,String username) {
 
         Rooms rooms = roomMapper.mapToEntity(roomDTO);
 
         Businesses businesses = businessRepository.findByBusinessName(roomDTO.getBusinessName()).orElseThrow(() -> new RuntimeException("Business not found"));
+
+        User user = userRepository.findUserByUsername(username)
+                .orElseThrow(() -> new RecordNotFoundException("User not found"));
+
+        if (!user.getRole().getRoleName().equals("ADMIN")) {
+            throw new AuthenticationFailedException("User does not have sufficient privileges to add a business");
+        }
 
         MultipartFile image = roomDTO.getImage();
         if (image != null && !image.isEmpty()) {

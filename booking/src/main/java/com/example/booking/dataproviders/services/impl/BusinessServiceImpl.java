@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -44,8 +45,16 @@ public class BusinessServiceImpl implements BusinessService {
     }
 
     @Override
-    public List<String> findAllBusinessesOfAdmin() {
-        return List.of();
+    public List<String> findAllBusinessesOfAdmin(String username) {
+
+        User admin = userRepository.findUserByUsername(username)
+                .orElseThrow(() -> new RecordNotFoundException("User not found"));
+
+        List<Businesses> businesses = businessRepository.findByAdmin(admin);
+
+        return businesses.stream()
+                .map(Businesses::getBusinessName)
+                .collect(Collectors.toList());
     }
 
 
@@ -59,11 +68,11 @@ public class BusinessServiceImpl implements BusinessService {
 
     @Override
     @Transactional
-    public ResponseBusinessDTO saveBusiness(RequestBusinessDTO requestBusinessDTO, String email) {
+    public ResponseBusinessDTO saveBusiness(RequestBusinessDTO requestBusinessDTO, String username) {
 
         Businesses businesses = businessMapper.mapToEntity(requestBusinessDTO);
 
-        User user = userRepository.findByEmail(email)
+        User user = userRepository.findUserByUsername(username)
                 .orElseThrow(() -> new RecordNotFoundException("User not found"));
 
         if (!user.getRole().getRoleName().equals("ADMIN")) {

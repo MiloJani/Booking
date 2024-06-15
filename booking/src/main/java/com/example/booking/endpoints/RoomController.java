@@ -39,8 +39,8 @@ public class RoomController {
     public ResponseEntity<ResponseRoomDTO> saveRoom(@ModelAttribute RequestRoomDTO requestRoomDTO/*@Valid @RequestBody RequestRoomDTO requestRoomDTO*/) {
         try {
             SecurityContext context = SecurityContextHolder.getContext();
-            String userEmail = context.getAuthentication().getName();
-            return new ResponseEntity<>(roomService.createRoom(requestRoomDTO,userEmail), HttpStatus.CREATED);
+            String username = context.getAuthentication().getName();
+            return new ResponseEntity<>(roomService.createRoom(requestRoomDTO,username), HttpStatus.CREATED);
         }catch (RuntimeException ex){
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         }

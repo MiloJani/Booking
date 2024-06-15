@@ -33,6 +33,18 @@ public class BusinessController {
         return ResponseEntity.ok(businessService.findBusinessById(id));
     }
 
+    @GetMapping("/admin")
+    public ResponseEntity<List<String>> findAllBusinessesOfAdmin() {
+        try {
+            SecurityContext context = SecurityContextHolder.getContext();
+            String username = context.getAuthentication().getName();
+            List<String> businesses = businessService.findAllBusinessesOfAdmin(username);
+            return new ResponseEntity<>(businesses, HttpStatus.OK);
+        } catch (RuntimeException ex) {
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        }
+    }
+
     @PostMapping("/save")
     public ResponseEntity<ResponseBusinessDTO> saveBusiness(@ModelAttribute RequestBusinessDTO requestBusinessDTO
             /*@Valid @RequestBody RequestBusinessDTO requestBusinessDTO*/) {
@@ -40,8 +52,8 @@ public class BusinessController {
         try {
 
             SecurityContext context = SecurityContextHolder.getContext();
-            String userEmail = context.getAuthentication().getName();
-            return new ResponseEntity<>(businessService.saveBusiness(requestBusinessDTO,userEmail), HttpStatus.CREATED);
+            String username = context.getAuthentication().getName();
+            return new ResponseEntity<>(businessService.saveBusiness(requestBusinessDTO,username), HttpStatus.CREATED);
         }catch (RuntimeException ex){
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         }

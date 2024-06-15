@@ -10,7 +10,7 @@ public interface BusinessService {
 
         List<ResponseBusinessDTO> findAllBusinesses();
 
-        List<String> findAllBusinessesOfAdmin();
+        List<String> findAllBusinessesOfAdmin(String username);
 
         ResponseBusinessDTO findBusinessById(Long id);
 

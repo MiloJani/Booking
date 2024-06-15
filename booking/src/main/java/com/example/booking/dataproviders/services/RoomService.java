@@ -11,7 +11,7 @@ public interface RoomService {
 
     ResponseRoomDTO findRoomById(Long id);
 
-    ResponseRoomDTO createRoom(RequestRoomDTO roomDTO,String email);
+    ResponseRoomDTO createRoom(RequestRoomDTO roomDTO,String username);
 
     ResponseRoomDTO updateRoom(RequestRoomDTO roomDTO,Long id);
 
