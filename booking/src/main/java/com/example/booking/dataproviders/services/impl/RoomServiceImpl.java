@@ -1,6 +1,7 @@
 package com.example.booking.dataproviders.services.impl;
 
 import com.example.booking.core.exceptions.AuthenticationFailedException;
+import com.example.booking.core.exceptions.FileCouldNotBeSavedException;
 import com.example.booking.core.exceptions.RecordNotFoundException;
 import com.example.booking.dataproviders.dto.roomDTOs.RequestRoomDTO;
 import com.example.booking.dataproviders.dto.roomDTOs.ResponseRoomDTO;
@@ -52,11 +53,12 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     @Transactional
-    public ResponseRoomDTO createRoom(RequestRoomDTO roomDTO,String username) {
+    public /*ResponseRoomDTO*/ String createRoom(RequestRoomDTO roomDTO,String username) {
 
         Rooms rooms = roomMapper.mapToEntity(roomDTO);
 
-        Businesses businesses = businessRepository.findByBusinessName(roomDTO.getBusinessName()).orElseThrow(() -> new RuntimeException("Business not found"));
+        Businesses businesses = businessRepository.findByBusinessName(roomDTO.getBusinessName())
+                .orElseThrow(() -> new RecordNotFoundException("Business not found"));
 
         User user = userRepository.findUserByUsername(username)
                 .orElseThrow(() -> new RecordNotFoundException("User not found"));
@@ -68,7 +70,7 @@ public class RoomServiceImpl implements RoomService {
         MultipartFile image = roomDTO.getImage();
         if (image != null && !image.isEmpty()) {
             if (image.getSize() > 100 * 1024) {
-                throw new RuntimeException("File size must be less than or equal to 100KB");
+                throw new FileCouldNotBeSavedException("File size must be less than or equal to 100KB");
             }
             try {
 
@@ -82,7 +84,7 @@ public class RoomServiceImpl implements RoomService {
 
                 rooms.setImage(fileName);
             } catch (IOException e) {
-                throw new RuntimeException("Failed to save image file", e);
+                throw new FileCouldNotBeSavedException("Failed to save image file");
             }
         }
 
@@ -90,7 +92,9 @@ public class RoomServiceImpl implements RoomService {
 
         Rooms savedRoom = roomRepository.save(rooms);
 
-        return roomMapper.mapToDto(savedRoom);
+//        return roomMapper.mapToDto(savedRoom);
+
+        return "Room saved successfully";
     }
 
     @Override

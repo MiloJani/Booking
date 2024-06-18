@@ -49,5 +49,15 @@ public class GlobalExceptionHandler {
                 ex.getMessage());
     }
 
+    @ExceptionHandler(value
+            = FileCouldNotBeSavedException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public @ResponseBody ErrorResponse
+    handleFileCouldNotBeSavedException(
+            FileCouldNotBeSavedException ex) {
+        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(),
+                ex.getMessage());
+    }
+
 
 }

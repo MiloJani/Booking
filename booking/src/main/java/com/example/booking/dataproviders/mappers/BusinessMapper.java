@@ -45,11 +45,11 @@ public class BusinessMapper {
     public Businesses mapToEntity(RequestBusinessDTO requestBusinessDTO) {
 
         Businesses businesses = new Businesses();
-        businesses.setBusinessName(requestBusinessDTO.getBusinessName());
-        businesses.setFreeBreakfast(requestBusinessDTO.isFreeBreakfast());
-        businesses.setFreeParking(requestBusinessDTO.isFreeParking());
-        businesses.setFreeWifi(requestBusinessDTO.isFreeWifi());
-        businesses.setInsidePool(requestBusinessDTO.isInsidePool());
+        businesses.setBusinessName(requestBusinessDTO.getName());
+        businesses.setFreeBreakfast(Boolean.parseBoolean(requestBusinessDTO.getFreeBreakfast()));
+        businesses.setFreeParking(Boolean.parseBoolean(requestBusinessDTO.getFreeParking()));
+        businesses.setFreeWifi(Boolean.parseBoolean(requestBusinessDTO.getFreeWifi()));
+        businesses.setInsidePool(Boolean.parseBoolean(requestBusinessDTO.getInsidePool()));
 //        businesses.setTax(requestBusinessDTO.getTax());
 //        businesses.setImage(requestBusinessDTO.getImage());
 

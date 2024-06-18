@@ -8,13 +8,16 @@ import com.example.booking.dataproviders.services.RoomService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @RestController
@@ -36,14 +39,20 @@ public class RoomController {
     }
 
     @PostMapping("/save")
-    public ResponseEntity<ResponseRoomDTO> saveRoom(@ModelAttribute RequestRoomDTO requestRoomDTO/*@Valid @RequestBody RequestRoomDTO requestRoomDTO*/) {
-        try {
-            SecurityContext context = SecurityContextHolder.getContext();
-            String username = context.getAuthentication().getName();
-            return new ResponseEntity<>(roomService.createRoom(requestRoomDTO,username), HttpStatus.CREATED);
-        }catch (RuntimeException ex){
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+    public ResponseEntity<?/*ResponseRoomDTO*/> saveRoom(@Valid @ModelAttribute RequestRoomDTO requestRoomDTO/*@Valid @RequestBody RequestRoomDTO requestRoomDTO*/
+    , BindingResult bindingResult) {
+
+        if (bindingResult.hasErrors()) {
+            List<String> errors = bindingResult.getAllErrors().stream()
+                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                    .collect(Collectors.toList());
+            return ResponseEntity.badRequest().body(errors);
         }
+
+        SecurityContext context = SecurityContextHolder.getContext();
+        String username = context.getAuthentication().getName();
+        return new ResponseEntity<>(roomService.createRoom(requestRoomDTO,username), HttpStatus.CREATED);
+
 
     }
 

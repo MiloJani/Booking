@@ -1,6 +1,8 @@
 package com.example.booking.dataproviders.dto.businessDTOs;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.web.multipart.MultipartFile;
@@ -9,17 +11,19 @@ import org.springframework.web.multipart.MultipartFile;
 @Setter
 public class RequestBusinessDTO {
 
-    @NotBlank()
-    private String businessName;
+    @NotBlank(message = "Business name is mandatory")
+    @Schema(example = "Milo's Amazing Hotel")
+    private String name;
 
-    private boolean freeParking;
+    private String freeParking;
 
-    private boolean freeWifi;
+    private String freeWifi;
 
-    private boolean insidePool;
+    private String insidePool;
 
-    private boolean freeBreakfast;
+    private String  freeBreakfast;
 
+    @NotNull(message = "Image file cannot be null")
     private MultipartFile image;
 
 //    private Double tax=0.07;

@@ -1,6 +1,7 @@
 package com.example.booking.dataproviders.services.impl;
 
 import com.example.booking.core.exceptions.AuthenticationFailedException;
+import com.example.booking.core.exceptions.FileCouldNotBeSavedException;
 import com.example.booking.core.exceptions.RecordNotFoundException;
 import com.example.booking.dataproviders.dto.bookingDTOs.RequestBookingDTO;
 import com.example.booking.dataproviders.dto.businessDTOs.RequestBusinessDTO;
@@ -68,7 +69,7 @@ public class BusinessServiceImpl implements BusinessService {
 
     @Override
     @Transactional
-    public ResponseBusinessDTO saveBusiness(RequestBusinessDTO requestBusinessDTO, String username) {
+    public /*ResponseBusinessDTO*/String saveBusiness(RequestBusinessDTO requestBusinessDTO, String username) {
 
         Businesses businesses = businessMapper.mapToEntity(requestBusinessDTO);
 
@@ -79,10 +80,12 @@ public class BusinessServiceImpl implements BusinessService {
             throw new AuthenticationFailedException("User does not have sufficient privileges to add a business");
         }
 
+        businesses.setAdmin(user);
+
         MultipartFile image = requestBusinessDTO.getImage();
         if (image != null && !image.isEmpty()) {
             if (image.getSize() > 100 * 1024) {
-                throw new RuntimeException("File size must be less than or equal to 100KB");
+                throw new FileCouldNotBeSavedException("File size must be less than or equal to 100KB");
             }
             try {
 
@@ -96,16 +99,15 @@ public class BusinessServiceImpl implements BusinessService {
 
                 businesses.setImage(fileName);
             } catch (IOException e) {
-                throw new RuntimeException("Failed to save image file", e);
+                throw new FileCouldNotBeSavedException("Failed to save image file");
             }
         }
 
         businesses.setTax(0.07);
         Businesses savedBusiness = businessRepository.save(businesses);
 
-        //File file = new File("path/to/image/folder/" + fileName);
-        //file.transferTo(new File(filePath))
-        return businessMapper.mapToDto(savedBusiness);
+//        return businessMapper.mapToDto(savedBusiness);
+        return "Business saved successfully";
     }
 
     @Override
@@ -113,11 +115,11 @@ public class BusinessServiceImpl implements BusinessService {
 
         Businesses foundBusiness = businessRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("Business not found"));
 
-        foundBusiness.setBusinessName(requestBusinessDTO.getBusinessName());
-        foundBusiness.setFreeBreakfast(requestBusinessDTO.isFreeBreakfast());
-        foundBusiness.setFreeParking(requestBusinessDTO.isFreeParking());
-        foundBusiness.setFreeWifi(requestBusinessDTO.isFreeWifi());
-        foundBusiness.setInsidePool(requestBusinessDTO.isInsidePool());
+        foundBusiness.setBusinessName(requestBusinessDTO.getName());
+        foundBusiness.setFreeBreakfast(Boolean.parseBoolean(requestBusinessDTO.getFreeBreakfast()));
+        foundBusiness.setFreeParking(Boolean.parseBoolean(requestBusinessDTO.getFreeParking()));
+        foundBusiness.setFreeWifi(Boolean.parseBoolean(requestBusinessDTO.getFreeWifi()));
+        foundBusiness.setInsidePool(Boolean.parseBoolean(requestBusinessDTO.getFreeBreakfast()));
 //        foundBusiness.setTax(requestBusinessDTO.getTax());
 //        foundBusiness.setImage(requestBusinessDTO.getImage());
         Businesses updatedBusiness = businessRepository.save(foundBusiness);

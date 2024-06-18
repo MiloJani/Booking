@@ -6,14 +6,18 @@ import com.example.booking.dataproviders.services.BusinessService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
+@CrossOrigin(origins = "*")
 @AllArgsConstructor
 @RestController
 @SecurityRequirement(name = "Bearer authentication")
@@ -21,6 +25,11 @@ import java.util.List;
 public class BusinessController {
 
     private final BusinessService businessService;
+
+    @GetMapping("/prove")
+    public ResponseEntity<String> hi(){
+        return ResponseEntity.ok("Hi");
+    }
 
     @GetMapping("/findAll")
     public ResponseEntity<List<ResponseBusinessDTO>> findAll() {
@@ -35,28 +44,31 @@ public class BusinessController {
 
     @GetMapping("/admin")
     public ResponseEntity<List<String>> findAllBusinessesOfAdmin() {
-        try {
+
             SecurityContext context = SecurityContextHolder.getContext();
             String username = context.getAuthentication().getName();
             List<String> businesses = businessService.findAllBusinessesOfAdmin(username);
             return new ResponseEntity<>(businesses, HttpStatus.OK);
-        } catch (RuntimeException ex) {
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-        }
+
     }
 
     @PostMapping("/save")
-    public ResponseEntity<ResponseBusinessDTO> saveBusiness(@ModelAttribute RequestBusinessDTO requestBusinessDTO
+    public ResponseEntity<?/*ResponseBusinessDTO*/> saveBusiness(@Valid @ModelAttribute RequestBusinessDTO requestBusinessDTO,
+                                                            BindingResult bindingResult
             /*@Valid @RequestBody RequestBusinessDTO requestBusinessDTO*/) {
 
-        try {
-
-            SecurityContext context = SecurityContextHolder.getContext();
-            String username = context.getAuthentication().getName();
-            return new ResponseEntity<>(businessService.saveBusiness(requestBusinessDTO,username), HttpStatus.CREATED);
-        }catch (RuntimeException ex){
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        if (bindingResult.hasErrors()) {
+            List<String> errors = bindingResult.getAllErrors().stream()
+                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                    .collect(Collectors.toList());
+            return ResponseEntity.badRequest().body(errors);
         }
+
+
+        SecurityContext context = SecurityContextHolder.getContext();
+        String username = context.getAuthentication().getName();
+        return new ResponseEntity<>(businessService.saveBusiness(requestBusinessDTO,username), HttpStatus.CREATED);
+
 
     }
 

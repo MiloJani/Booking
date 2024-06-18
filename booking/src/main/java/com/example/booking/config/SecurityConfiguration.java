@@ -53,11 +53,11 @@ public class SecurityConfiguration {
                                 ,"/api/userInfo/findById/").hasAuthority("USER")
                         .requestMatchers(GET,"/api/users/findAll","/api/businesses/findAll","/api/businesses/findById/"
                                 , "/api/rooms/findAll","/api/rooms/findById/"
-                                ,"/api/roomPricing/findAll","/api/roomPricing/findById/").permitAll()
+                                ,"/api/roomPricing/findAll","/api/roomPricing/findById/","/api/businesses/prove").permitAll()
                         .requestMatchers(POST,"/api/auth/**").permitAll()
                         .requestMatchers(POST,"/api/booking/save").hasAuthority("USER")
                         .requestMatchers(POST,"/api/businesses/save"
-                                ,"/api/businesses/save","/api/rooms/save","/api/roomPricing/save").hasAuthority("ADMIN")
+                                ,"/api/rooms/save","/api/roomPricing/save").hasAuthority("ADMIN")
                         .requestMatchers(PUT,"/api/businesses/update/","/api/rooms/update/"
                                 ,"/api/roomPricing/update/").hasAuthority("ADMIN")
                         .requestMatchers(DELETE,"/api/booking/delete/").hasAuthority("USER")

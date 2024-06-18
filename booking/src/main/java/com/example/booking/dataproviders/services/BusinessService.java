@@ -14,7 +14,7 @@ public interface BusinessService {
 
         ResponseBusinessDTO findBusinessById(Long id);
 
-        ResponseBusinessDTO saveBusiness(RequestBusinessDTO requestBusinessDTO,String email);
+        /*ResponseBusinessDTO*/String saveBusiness(RequestBusinessDTO requestBusinessDTO,String email);
 
         ResponseBusinessDTO updateBusiness(RequestBusinessDTO requestBusinessDTO,Long id);
 

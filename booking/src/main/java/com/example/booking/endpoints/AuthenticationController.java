@@ -12,9 +12,14 @@ import com.example.booking.dataproviders.services.AuthenticationService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @RestController
@@ -27,9 +32,15 @@ public class AuthenticationController {
     private final AuthenticationService authenticationService;
 
     @PostMapping("/authenticate")
-    public ResponseEntity<AuthenticationResponse> authenticate(
-            @RequestBody AuthenticationRequest request
-    ){
+    public ResponseEntity<?/*AuthenticationResponse*/> authenticate(
+            @Valid @RequestBody AuthenticationRequest request, BindingResult bindingResult
+            ){
+        if (bindingResult.hasErrors()) {
+            List<String> errors = bindingResult.getAllErrors().stream()
+                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                    .collect(Collectors.toList());
+            return ResponseEntity.badRequest().body(errors);
+        }
         return ResponseEntity.ok(authenticationService.authenticate(request));
     }
 

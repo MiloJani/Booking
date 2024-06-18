@@ -3,21 +3,24 @@ package com.example.booking.dataproviders.services.impl;
 import com.example.booking.core.exceptions.RecordNotFoundException;
 import com.example.booking.dataproviders.dto.bookingDTOs.RequestBookingDTO;
 import com.example.booking.dataproviders.dto.bookingDTOs.ResponseBookingDTO;
-import com.example.booking.dataproviders.entities.Booking;
-import com.example.booking.dataproviders.entities.Payment;
-import com.example.booking.dataproviders.entities.Rooms;
-import com.example.booking.dataproviders.entities.User;
-import com.example.booking.dataproviders.mappers.BookingMapper;
-import com.example.booking.dataproviders.mappers.PaymentMapper;
-import com.example.booking.dataproviders.mappers.RoomMapper;
-import com.example.booking.dataproviders.mappers.UserMapper;
+import com.example.booking.dataproviders.dto.businessDTOs.ResponseBusinessDTO;
+import com.example.booking.dataproviders.dto.roomDTOs.ResponseRoomDTO;
+import com.example.booking.dataproviders.dto.searchDTOs.RequestSearchDTO;
+import com.example.booking.dataproviders.dto.searchDTOs.ResponseSearchDTO;
+import com.example.booking.dataproviders.entities.*;
+import com.example.booking.dataproviders.mappers.*;
 import com.example.booking.dataproviders.repositories.*;
 import com.example.booking.dataproviders.services.BookingService;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -31,6 +34,8 @@ public class BookingServiceImpl implements BookingService {
     private UserMapper userMapper;
     private UserInfoRepository userInfoRepository;
     private RoomRepository roomRepository;
+    private BusinessRepository businessRepository;
+    private BusinessMapper businessMapper;
     private RoomMapper roomMapper;
 
     @Override
@@ -51,6 +56,63 @@ public class BookingServiceImpl implements BookingService {
 
         return bookingMapper.mapToDto(booking);
     }
+
+
+//    //Search begin
+//@Override
+//public Page<ResponseSearchDTO> searchBookings(RequestSearchDTO searchRequest) {
+//    // Add sorting by room price in ascending order. For descending order, use Sort.by("price").descending()
+//    Pageable pageable = PageRequest.of(searchRequest.getPage(), searchRequest.getSize(), Sort.by("rooms.price").ascending());
+//    Page<Businesses> businessPage = businessRepository.findAll(pageable);
+//
+//    List<ResponseSearchDTO> bookingDTOs = businessPage.getContent().stream()
+//            .map(business -> {
+//                long freeRooms = business.getRooms().stream()
+//                        .filter(room -> isRoomFree(room, searchRequest))
+//                        .count();
+//
+//                ResponseBusinessDTO responseBusinessDTO = businessMapper.mapToDto(business);
+//
+//                ResponseSearchDTO responseSearchDTO = new ResponseSearchDTO();
+//                responseSearchDTO.setResponseBusinessDTO(responseBusinessDTO);
+//                responseSearchDTO.setFreeRooms((int) freeRooms);
+//
+//                return responseSearchDTO;
+//            })
+//            .sorted(Comparator.comparing(dto -> dto.getResponseBusinessDTO().getRooms().stream()
+//                    .mapToDouble(ResponseRoomDTO::getPrice)
+//                    .min()
+//                    .orElse(Double.MAX_VALUE)))  // Sorting by minimum room price in each business
+//            .collect(Collectors.toList());
+//
+//    return new PageImpl<>(bookingDTOs, pageable, businessPage.getTotalElements());
+//}
+//
+//    private boolean isRoomFree(Rooms room, RequestSearchDTO searchRequest) {
+//        int totalGuests = (searchRequest.getNoOfAdults() != null ? searchRequest.getNoOfAdults() : 0) +
+//                (searchRequest.getNoOfChildren() != null ? searchRequest.getNoOfChildren() : 0);
+//
+//        if (room.getCapacity() < totalGuests) {
+//            return false;
+//        }
+//
+//        LocalDate checkInDate = searchRequest.getCheckInDate();
+//        LocalDate checkOutDate = searchRequest.getCheckOutDate();
+//
+//        Specification<Booking> roomSpec = (root, query, criteriaBuilder) -> criteriaBuilder.and(
+//                criteriaBuilder.equal(root.get("room"), room),
+//                criteriaBuilder.or(
+//                        criteriaBuilder.lessThan(root.get("checkOutDate"), checkInDate),
+//                        criteriaBuilder.greaterThan(root.get("checkInDate"), checkOutDate)
+//                )
+//        );
+//
+//        boolean isFree = bookingRepository.findAll(roomSpec).isEmpty();
+//        System.out.println("Room: " + room.getRoomName() + ", Is Free: " + isFree);
+//
+//        return isFree;
+//    }
+//    //Search end
 
     @Override
     public ResponseBookingDTO saveBooking(RequestBookingDTO requestBookingDTO) {
