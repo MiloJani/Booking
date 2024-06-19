@@ -14,8 +14,6 @@ public interface BookingService {
 
     ResponseBookingDTO findBookingById(Long id);
 
-//    Page<ResponseSearchDTO> searchBookings(RequestSearchDTO searchRequest);
-
     ResponseBookingDTO saveBooking(RequestBookingDTO requestBookingDTO);
 
     ResponseBookingDTO updateBooking(RequestBookingDTO requestBookingDTO,Long id);

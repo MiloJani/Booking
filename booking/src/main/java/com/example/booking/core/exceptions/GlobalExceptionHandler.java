@@ -11,11 +11,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value
             = TokenInvalidException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public @ResponseBody ErrorResponse
     handleTokenExpiredException(
             TokenInvalidException ex) {
-        return new ErrorResponse(HttpStatus.CONFLICT.value(),
+        return new ErrorResponse(HttpStatus.UNAUTHORIZED.value(),
                 ex.getMessage());
     }
 

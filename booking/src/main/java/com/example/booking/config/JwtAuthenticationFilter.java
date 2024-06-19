@@ -3,6 +3,7 @@ package com.example.booking.config;
 import com.example.booking.core.exceptions.TokenInvalidException;
 import com.example.booking.dataproviders.entities.User;
 import com.example.booking.dataproviders.services.impl.JwtService;
+import io.jsonwebtoken.ExpiredJwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -38,25 +39,33 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
         jwt = authHeader.substring(7);
-        userEmail = jwtService.extractUsername(jwt);
-        if (userEmail != null &&
-                SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
-            if (jwtService.isTokenValid(jwt, userDetails)) {
-                UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(userDetails, null,
-                                userDetails.getAuthorities());
+        try {
+            userEmail = jwtService.extractUsername(jwt);
+            if (userEmail != null &&
+                    SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
 
-                authToken.setDetails(
-                        new WebAuthenticationDetailsSource().buildDetails(request)
-                );
-                SecurityContextHolder.getContext().setAuthentication(authToken);
-            }else {
-                throw new TokenInvalidException("Token is invalid");
-//                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-//                return;
+
+                if (jwtService.isTokenValid(jwt, userDetails)) {
+                    UsernamePasswordAuthenticationToken authToken =
+                            new UsernamePasswordAuthenticationToken(userDetails, null,
+                                    userDetails.getAuthorities());
+
+                    authToken.setDetails(
+                            new WebAuthenticationDetailsSource().buildDetails(request)
+                    );
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
+
+
             }
-
+        }catch (ExpiredJwtException t) {
+//            throw new TokenInvalidException("Token is invalid");
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"error\": \"Invalid JWT\", \"message\": \"Token has expired\"}");
+//                response.setHeader("WWW-Authenticate", "Basic realm=\"Booking Project\"");
+                return;
         }
         filterChain.doFilter(request, response);
     }

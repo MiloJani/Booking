@@ -3,18 +3,24 @@ package com.example.booking.dataproviders.services.impl;
 import com.example.booking.core.exceptions.AuthenticationFailedException;
 import com.example.booking.core.exceptions.FileCouldNotBeSavedException;
 import com.example.booking.core.exceptions.RecordNotFoundException;
-import com.example.booking.dataproviders.dto.bookingDTOs.RequestBookingDTO;
 import com.example.booking.dataproviders.dto.businessDTOs.RequestBusinessDTO;
 import com.example.booking.dataproviders.dto.businessDTOs.ResponseBusinessDTO;
+import com.example.booking.dataproviders.dto.businessDTOs.ResponseBusinessSearchDTO;
+import com.example.booking.dataproviders.dto.searchDTOs.RequestSearchDTO;
+import com.example.booking.dataproviders.dto.searchDTOs.ResponseSearchDTO;
 import com.example.booking.dataproviders.entities.Businesses;
 import com.example.booking.dataproviders.entities.User;
 import com.example.booking.dataproviders.mappers.BusinessMapper;
 import com.example.booking.dataproviders.repositories.BusinessRepository;
+import com.example.booking.dataproviders.repositories.RoomRepository;
 import com.example.booking.dataproviders.repositories.UserRepository;
 import com.example.booking.dataproviders.services.BusinessService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -31,6 +37,8 @@ public class BusinessServiceImpl implements BusinessService {
     private BusinessRepository businessRepository;
     private BusinessMapper businessMapper;
     private UserRepository userRepository;
+    private RoomRepository roomRepository;
+
     @Override
     public List<ResponseBusinessDTO> findAllBusinesses() {
 
@@ -51,6 +59,10 @@ public class BusinessServiceImpl implements BusinessService {
         User admin = userRepository.findUserByUsername(username)
                 .orElseThrow(() -> new RecordNotFoundException("User not found"));
 
+        if (!admin.getRole().getRoleName().equals("ADMIN")) {
+            throw new AuthenticationFailedException("User does not have sufficient privileges to add a business");
+        }
+
         List<Businesses> businesses = businessRepository.findByAdmin(admin);
 
         return businesses.stream()
@@ -66,6 +78,90 @@ public class BusinessServiceImpl implements BusinessService {
 
         return businessMapper.mapToDto(business);
     }
+
+    @Override
+    public Page<ResponseSearchDTO> search(RequestSearchDTO searchRequest) {
+        int page = 0;
+        int size = 20;
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Businesses> businessesPage = businessRepository.findAll(pageable);
+
+
+        return businessesPage.map(business -> {
+            int availableRooms = roomRepository.countAvailableRooms(
+                    business.getBusinessId(),
+                    searchRequest.getCheckInDate(),
+                    searchRequest.getCheckOutDate(),
+                    calculateCapacity(searchRequest.getNoOfAdults(), searchRequest.getNoOfChildren())
+            );
+
+            return businessMapper.mapToSearchDto(business, availableRooms);
+        });
+
+
+    }
+
+    private Integer calculateCapacity(Integer noOfAdults, Integer noOfChildren) {
+        return (noOfAdults != null ? noOfAdults : 0) + (noOfChildren != null ? noOfChildren : 0);
+    }
+
+
+
+    //    //Search begin
+//@Override
+//public Page<ResponseSearchDTO> searchBookings(RequestSearchDTO searchRequest) {
+//    // Add sorting by room price in ascending order. For descending order, use Sort.by("price").descending()
+//    Pageable pageable = PageRequest.of(searchRequest.getPage(), searchRequest.getSize(), Sort.by("rooms.price").ascending());
+//    Page<Businesses> businessPage = businessRepository.findAll(pageable);
+//
+//    List<ResponseSearchDTO> bookingDTOs = businessPage.getContent().stream()
+//            .map(business -> {
+//                long freeRooms = business.getRooms().stream()
+//                        .filter(room -> isRoomFree(room, searchRequest))
+//                        .count();
+//
+//                ResponseBusinessDTO responseBusinessDTO = businessMapper.mapToDto(business);
+//
+//                ResponseSearchDTO responseSearchDTO = new ResponseSearchDTO();
+//                responseSearchDTO.setResponseBusinessDTO(responseBusinessDTO);
+//                responseSearchDTO.setFreeRooms((int) freeRooms);
+//
+//                return responseSearchDTO;
+//            })
+//            .sorted(Comparator.comparing(dto -> dto.getResponseBusinessDTO().getRooms().stream()
+//                    .mapToDouble(ResponseRoomDTO::getPrice)
+//                    .min()
+//                    .orElse(Double.MAX_VALUE)))  // Sorting by minimum room price in each business
+//            .collect(Collectors.toList());
+//
+//    return new PageImpl<>(bookingDTOs, pageable, businessPage.getTotalElements());
+//}
+//
+//    private boolean isRoomFree(Rooms room, RequestSearchDTO searchRequest) {
+//        int totalGuests = (searchRequest.getNoOfAdults() != null ? searchRequest.getNoOfAdults() : 0) +
+//                (searchRequest.getNoOfChildren() != null ? searchRequest.getNoOfChildren() : 0);
+//
+//        if (room.getCapacity() < totalGuests) {
+//            return false;
+//        }
+//
+//        LocalDate checkInDate = searchRequest.getCheckInDate();
+//        LocalDate checkOutDate = searchRequest.getCheckOutDate();
+//
+//        Specification<Booking> roomSpec = (root, query, criteriaBuilder) -> criteriaBuilder.and(
+//                criteriaBuilder.equal(root.get("room"), room),
+//                criteriaBuilder.or(
+//                        criteriaBuilder.lessThan(root.get("checkOutDate"), checkInDate),
+//                        criteriaBuilder.greaterThan(root.get("checkInDate"), checkOutDate)
+//                )
+//        );
+//
+//        boolean isFree = bookingRepository.findAll(roomSpec).isEmpty();
+//        System.out.println("Room: " + room.getRoomName() + ", Is Free: " + isFree);
+//
+//        return isFree;
+//    }
+//    //Search end
 
     @Override
     @Transactional
@@ -89,7 +185,7 @@ public class BusinessServiceImpl implements BusinessService {
             }
             try {
 
-                String uploadDir = "C:\\Users\\USER\\Desktop\\BookingProject\\Booking\\booking\\src\\main\\resources\\images\\";
+                String uploadDir = "C:\\Users\\USER\\Desktop\\BookingProject\\Booking\\booking\\src\\main\\resources\\images\\businesses\\";
 
                 String fileName = System.currentTimeMillis() + "_" + image.getOriginalFilename();
 

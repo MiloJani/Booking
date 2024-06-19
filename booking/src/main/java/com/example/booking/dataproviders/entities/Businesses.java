@@ -20,7 +20,7 @@ public class Businesses {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long businessId;
 
-    @Column(name = "BUSINESS_NAME",nullable = false)
+    @Column(name = "BUSINESS_NAME",nullable = false,unique = true)
     private String businessName;
 
     @Column(name = "FREE_PARKING",nullable = false)

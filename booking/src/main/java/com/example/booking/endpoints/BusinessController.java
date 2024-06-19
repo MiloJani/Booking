@@ -2,11 +2,14 @@ package com.example.booking.endpoints;
 
 import com.example.booking.dataproviders.dto.businessDTOs.RequestBusinessDTO;
 import com.example.booking.dataproviders.dto.businessDTOs.ResponseBusinessDTO;
+import com.example.booking.dataproviders.dto.searchDTOs.RequestSearchDTO;
+import com.example.booking.dataproviders.dto.searchDTOs.ResponseSearchDTO;
 import com.example.booking.dataproviders.services.BusinessService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContext;
@@ -50,6 +53,12 @@ public class BusinessController {
             List<String> businesses = businessService.findAllBusinessesOfAdmin(username);
             return new ResponseEntity<>(businesses, HttpStatus.OK);
 
+    }
+
+    @PostMapping("/search")
+    public ResponseEntity<Page<ResponseSearchDTO>> searchBookings(@Valid @RequestBody RequestSearchDTO searchRequest) {
+        Page<ResponseSearchDTO> searchResults = businessService.search(searchRequest);
+        return ResponseEntity.ok(searchResults);
     }
 
     @PostMapping("/save")

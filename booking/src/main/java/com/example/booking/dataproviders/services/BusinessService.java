@@ -3,6 +3,9 @@ package com.example.booking.dataproviders.services;
 import com.example.booking.dataproviders.dto.bookingDTOs.RequestBookingDTO;
 import com.example.booking.dataproviders.dto.businessDTOs.RequestBusinessDTO;
 import com.example.booking.dataproviders.dto.businessDTOs.ResponseBusinessDTO;
+import com.example.booking.dataproviders.dto.searchDTOs.RequestSearchDTO;
+import com.example.booking.dataproviders.dto.searchDTOs.ResponseSearchDTO;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -13,6 +16,8 @@ public interface BusinessService {
         List<String> findAllBusinessesOfAdmin(String username);
 
         ResponseBusinessDTO findBusinessById(Long id);
+
+        Page<ResponseSearchDTO> search(RequestSearchDTO searchRequest);
 
         /*ResponseBusinessDTO*/String saveBusiness(RequestBusinessDTO requestBusinessDTO,String email);
 

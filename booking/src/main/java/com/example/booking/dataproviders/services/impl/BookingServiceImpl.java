@@ -58,62 +58,6 @@ public class BookingServiceImpl implements BookingService {
     }
 
 
-//    //Search begin
-//@Override
-//public Page<ResponseSearchDTO> searchBookings(RequestSearchDTO searchRequest) {
-//    // Add sorting by room price in ascending order. For descending order, use Sort.by("price").descending()
-//    Pageable pageable = PageRequest.of(searchRequest.getPage(), searchRequest.getSize(), Sort.by("rooms.price").ascending());
-//    Page<Businesses> businessPage = businessRepository.findAll(pageable);
-//
-//    List<ResponseSearchDTO> bookingDTOs = businessPage.getContent().stream()
-//            .map(business -> {
-//                long freeRooms = business.getRooms().stream()
-//                        .filter(room -> isRoomFree(room, searchRequest))
-//                        .count();
-//
-//                ResponseBusinessDTO responseBusinessDTO = businessMapper.mapToDto(business);
-//
-//                ResponseSearchDTO responseSearchDTO = new ResponseSearchDTO();
-//                responseSearchDTO.setResponseBusinessDTO(responseBusinessDTO);
-//                responseSearchDTO.setFreeRooms((int) freeRooms);
-//
-//                return responseSearchDTO;
-//            })
-//            .sorted(Comparator.comparing(dto -> dto.getResponseBusinessDTO().getRooms().stream()
-//                    .mapToDouble(ResponseRoomDTO::getPrice)
-//                    .min()
-//                    .orElse(Double.MAX_VALUE)))  // Sorting by minimum room price in each business
-//            .collect(Collectors.toList());
-//
-//    return new PageImpl<>(bookingDTOs, pageable, businessPage.getTotalElements());
-//}
-//
-//    private boolean isRoomFree(Rooms room, RequestSearchDTO searchRequest) {
-//        int totalGuests = (searchRequest.getNoOfAdults() != null ? searchRequest.getNoOfAdults() : 0) +
-//                (searchRequest.getNoOfChildren() != null ? searchRequest.getNoOfChildren() : 0);
-//
-//        if (room.getCapacity() < totalGuests) {
-//            return false;
-//        }
-//
-//        LocalDate checkInDate = searchRequest.getCheckInDate();
-//        LocalDate checkOutDate = searchRequest.getCheckOutDate();
-//
-//        Specification<Booking> roomSpec = (root, query, criteriaBuilder) -> criteriaBuilder.and(
-//                criteriaBuilder.equal(root.get("room"), room),
-//                criteriaBuilder.or(
-//                        criteriaBuilder.lessThan(root.get("checkOutDate"), checkInDate),
-//                        criteriaBuilder.greaterThan(root.get("checkInDate"), checkOutDate)
-//                )
-//        );
-//
-//        boolean isFree = bookingRepository.findAll(roomSpec).isEmpty();
-//        System.out.println("Room: " + room.getRoomName() + ", Is Free: " + isFree);
-//
-//        return isFree;
-//    }
-//    //Search end
-
     @Override
     public ResponseBookingDTO saveBooking(RequestBookingDTO requestBookingDTO) {
 

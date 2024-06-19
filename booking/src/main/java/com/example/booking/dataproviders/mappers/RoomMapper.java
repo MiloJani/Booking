@@ -28,8 +28,8 @@ public class RoomMapper {
 
         Rooms rooms = new Rooms();
         rooms.setRoomName(requestRoomDTO.getRoomName());
-        rooms.setCapacity(requestRoomDTO.getCapacity());
-        rooms.setPrice(requestRoomDTO.getPrice());
+        rooms.setCapacity(Integer.parseInt(requestRoomDTO.getCapacity()));
+        rooms.setPrice(Double.parseDouble(requestRoomDTO.getPrice()));
         rooms.setDescription(requestRoomDTO.getDescription());
 //        rooms.setImage(requestRoomDTO.getImage());
         rooms.setRoomType(requestRoomDTO.getRoomType());

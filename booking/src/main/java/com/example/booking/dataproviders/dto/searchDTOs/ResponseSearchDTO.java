@@ -1,6 +1,7 @@
 package com.example.booking.dataproviders.dto.searchDTOs;
 
 import com.example.booking.dataproviders.dto.businessDTOs.ResponseBusinessDTO;
+import com.example.booking.dataproviders.dto.businessDTOs.ResponseBusinessSearchDTO;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,6 +9,6 @@ import lombok.Setter;
 @Setter
 public class ResponseSearchDTO {
 
-    private ResponseBusinessDTO responseBusinessDTO;
+    private ResponseBusinessSearchDTO responseBusinessSearchDTO;
     private int freeRooms;
 }

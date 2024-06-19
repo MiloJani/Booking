@@ -55,6 +55,10 @@ public class RoomServiceImpl implements RoomService {
     @Transactional
     public /*ResponseRoomDTO*/ String createRoom(RequestRoomDTO roomDTO,String username) {
 
+        if (Integer.parseInt(roomDTO.getCapacity())<0 || Double.parseDouble(roomDTO.getPrice())<0 ){
+            throw new RuntimeException("Invalid data");
+        }
+
         Rooms rooms = roomMapper.mapToEntity(roomDTO);
 
         Businesses businesses = businessRepository.findByBusinessName(roomDTO.getBusinessName())
@@ -102,9 +106,13 @@ public class RoomServiceImpl implements RoomService {
 
         Rooms foundRoom = roomRepository.findById(id).orElseThrow(() -> new RuntimeException("Room not found"));
 
+        if (Integer.parseInt(requestRoomDTO.getCapacity())<0 || Double.parseDouble(requestRoomDTO.getPrice())<0 ){
+            throw new RuntimeException("Invalid data");
+        }
+
         foundRoom.setRoomName(requestRoomDTO.getRoomName());
-        foundRoom.setCapacity(requestRoomDTO.getCapacity());
-        foundRoom.setPrice(requestRoomDTO.getPrice());
+        foundRoom.setCapacity(Integer.parseInt(requestRoomDTO.getCapacity()));
+        foundRoom.setPrice(Double.parseDouble(requestRoomDTO.getPrice()));
         foundRoom.setDescription(requestRoomDTO.getDescription());
 //        foundRoom.setImage(requestRoomDTO.getImage());
         foundRoom.setRoomType(requestRoomDTO.getRoomType());

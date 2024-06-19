@@ -41,12 +41,6 @@ public class BookingController {
         return new ResponseEntity<>(bookingService.saveBooking(requestBookingDTO), HttpStatus.CREATED);
     }
 
-//    @PostMapping("/search")
-//    public ResponseEntity<Page<ResponseSearchDTO>> searchBookings(@Valid @RequestBody RequestSearchDTO searchRequest) {
-//        Page<ResponseSearchDTO> searchResults = bookingService.searchBookings(searchRequest);
-//        return ResponseEntity.ok(searchResults);
-//    }
-
 
 //    @PutMapping("/update/{id}")
 //    public ResponseEntity<ResponseBookingDTO> updateBusiness(@Valid @RequestBody RequestBookingDTO requestBookingDTO, @PathVariable Long id) {

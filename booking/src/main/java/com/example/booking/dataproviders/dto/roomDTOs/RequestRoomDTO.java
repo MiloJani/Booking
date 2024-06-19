@@ -20,12 +20,12 @@ public class RequestRoomDTO {
     private String roomName;
 
     @NotNull(message = "Capacity cannot be null")
-    @Min(value = 1, message = "Capacity must be at least 1")
-    private Integer capacity;
+//    @Min(value = 1, message = "Capacity must be at least 1")
+    private String capacity;
 
     @NotNull(message = "Price cannot be null")
-    @DecimalMin(value = "0.01", message = "Price must be greater than or equal to 0.01")
-    private Double price;
+//    @DecimalMin(value = "0.01", message = "Price must be greater than or equal to 0.01")
+    private String price;
 
     @Size(max = 255, message = "Description must be less than or equal to 255 characters")
     private String description;

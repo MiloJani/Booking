@@ -2,7 +2,9 @@ package com.example.booking.dataproviders.mappers;
 
 import com.example.booking.dataproviders.dto.businessDTOs.RequestBusinessDTO;
 import com.example.booking.dataproviders.dto.businessDTOs.ResponseBusinessDTO;
+import com.example.booking.dataproviders.dto.businessDTOs.ResponseBusinessSearchDTO;
 import com.example.booking.dataproviders.dto.roomDTOs.ResponseRoomDTO;
+import com.example.booking.dataproviders.dto.searchDTOs.ResponseSearchDTO;
 import com.example.booking.dataproviders.entities.Businesses;
 import com.example.booking.dataproviders.entities.Rooms;
 import lombok.AllArgsConstructor;
@@ -54,5 +56,23 @@ public class BusinessMapper {
 //        businesses.setImage(requestBusinessDTO.getImage());
 
         return businesses;
+    }
+
+    public ResponseSearchDTO mapToSearchDto(Businesses businesses, int availableRooms) {
+        ResponseBusinessSearchDTO responseBusinessSearchDTO = new ResponseBusinessSearchDTO();
+        responseBusinessSearchDTO.setBusinessId(businesses.getBusinessId());
+        responseBusinessSearchDTO.setBusinessName(businesses.getBusinessName());
+        responseBusinessSearchDTO.setFreeParking(businesses.isFreeParking());
+        responseBusinessSearchDTO.setFreeWifi(businesses.isFreeWifi());
+        responseBusinessSearchDTO.setInsidePool(businesses.isInsidePool());
+        responseBusinessSearchDTO.setFreeBreakfast(businesses.isFreeBreakfast());
+        responseBusinessSearchDTO.setImage(businesses.getImage());
+        responseBusinessSearchDTO.setTax(businesses.getTax());
+
+        ResponseSearchDTO responseSearchDTO = new ResponseSearchDTO();
+        responseSearchDTO.setResponseBusinessSearchDTO(responseBusinessSearchDTO);
+        responseSearchDTO.setFreeRooms(availableRooms);
+
+        return responseSearchDTO;
     }
 }
