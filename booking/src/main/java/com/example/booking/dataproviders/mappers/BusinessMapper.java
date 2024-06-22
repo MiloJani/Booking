@@ -1,5 +1,6 @@
 package com.example.booking.dataproviders.mappers;
 
+import com.example.booking.config.NetworkUtils;
 import com.example.booking.dataproviders.dto.businessDTOs.RequestBusinessDTO;
 import com.example.booking.dataproviders.dto.businessDTOs.ResponseBusinessDTO;
 import com.example.booking.dataproviders.dto.businessDTOs.ResponseBusinessSearchDTO;
@@ -9,7 +10,16 @@ import com.example.booking.dataproviders.entities.Businesses;
 import com.example.booking.dataproviders.entities.Rooms;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -19,6 +29,9 @@ import java.util.Set;
 public class BusinessMapper {
 
     private RoomMapper roomMapper;
+    private static final String UPLOAD_DIR = "C:\\Users\\USER\\Desktop\\BookingProject\\Booking\\booking\\src\\main\\resources\\images\\businesses\\";
+
+
     public ResponseBusinessDTO mapToDto(Businesses businesses) {
 
         ResponseBusinessDTO responseBusinessDTO = new ResponseBusinessDTO();
@@ -66,13 +79,47 @@ public class BusinessMapper {
         responseBusinessSearchDTO.setFreeWifi(businesses.isFreeWifi());
         responseBusinessSearchDTO.setInsidePool(businesses.isInsidePool());
         responseBusinessSearchDTO.setFreeBreakfast(businesses.isFreeBreakfast());
-        responseBusinessSearchDTO.setImage(businesses.getImage());
         responseBusinessSearchDTO.setTax(businesses.getTax());
+
+
+//        if (imageFileName != null) {
+//            try {
+//                Path imagePath = Paths.get(UPLOAD_DIR, imageFileName);
+//                byte[] imageBytes = Files.readAllBytes(imagePath);
+//                String base64Image = Base64.getEncoder().encodeToString(imageBytes);
+//                responseBusinessSearchDTO.setImage(base64Image);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
+
+        String imageFileName = businesses.getImage();
+        responseBusinessSearchDTO.setImage(getBusinessImageUrl(imageFileName));
 
         ResponseSearchDTO responseSearchDTO = new ResponseSearchDTO();
         responseSearchDTO.setResponseBusinessSearchDTO(responseBusinessSearchDTO);
         responseSearchDTO.setFreeRooms(availableRooms);
 
         return responseSearchDTO;
+    }
+
+//    private String getBusinessImageUrl(String imageFileName) {
+//        if (imageFileName != null) {
+//            String fileUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+//                    .path("/images/businesses/")
+//                    .path(imageFileName)
+//                    .toUriString();
+//            return fileUrl;
+//        }
+//        return null;
+//    }
+
+    private String getBusinessImageUrl(String imageFileName) {
+        if (imageFileName != null) {
+            String serverIp = NetworkUtils.getServerIpAddress();
+            String fileUrl = "http://" + serverIp + ":8080/images/businesses/" + imageFileName;
+            return fileUrl;
+        }
+        return null;
     }
 }

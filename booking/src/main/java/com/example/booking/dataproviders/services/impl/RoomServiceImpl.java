@@ -2,6 +2,7 @@ package com.example.booking.dataproviders.services.impl;
 
 import com.example.booking.core.exceptions.AuthenticationFailedException;
 import com.example.booking.core.exceptions.FileCouldNotBeSavedException;
+import com.example.booking.core.exceptions.RecordAlreadyExistsException;
 import com.example.booking.core.exceptions.RecordNotFoundException;
 import com.example.booking.dataproviders.dto.roomDTOs.RequestRoomDTO;
 import com.example.booking.dataproviders.dto.roomDTOs.ResponseRoomDTO;
@@ -63,6 +64,10 @@ public class RoomServiceImpl implements RoomService {
 
         Businesses businesses = businessRepository.findByBusinessName(roomDTO.getBusinessName())
                 .orElseThrow(() -> new RecordNotFoundException("Business not found"));
+
+        if (roomRepository.findByRoomNameAndBusinesses(roomDTO.getRoomName(), businesses).isPresent()) {
+            throw new RecordAlreadyExistsException("Room with the same name already exists under this business");
+        }
 
         User user = userRepository.findUserByUsername(username)
                 .orElseThrow(() -> new RecordNotFoundException("User not found"));

@@ -2,6 +2,7 @@ package com.example.booking.dataproviders.services.impl;
 
 import com.example.booking.core.exceptions.AuthenticationFailedException;
 import com.example.booking.core.exceptions.FileCouldNotBeSavedException;
+import com.example.booking.core.exceptions.RecordAlreadyExistsException;
 import com.example.booking.core.exceptions.RecordNotFoundException;
 import com.example.booking.dataproviders.dto.businessDTOs.RequestBusinessDTO;
 import com.example.booking.dataproviders.dto.businessDTOs.ResponseBusinessDTO;
@@ -34,6 +35,8 @@ import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -92,18 +95,29 @@ public class BusinessServiceImpl implements BusinessService {
         Pageable pageable = PageRequest.of(page, size);
         Page<Businesses> businessesPage = businessRepository.findAll(pageable);
 
-        Date checkInDate = searchRequest.getCheckInDate() != null ? Date.valueOf(searchRequest.getCheckInDate()) : null;
-        Date checkOutDate = searchRequest.getCheckOutDate() != null ? Date.valueOf(searchRequest.getCheckOutDate()) : null;
+//        return businessesPage.map(business -> {
+//            int availableRooms = roomRepository.countAvailableRooms(
+//                    business.getBusinessId(),
+//                    searchRequest.getCheckInDate(),
+//                    searchRequest.getCheckOutDate(),
+//                    calculateCapacity(searchRequest.getNoOfAdults(), searchRequest.getNoOfChildren())
+//            );
+//
+//            return businessMapper.mapToSearchDto(business, availableRooms);
+//        });
 
         return businessesPage.map(business -> {
-            int availableRooms = roomRepository.countAvailableRooms(
+            int capacity = calculateCapacity(searchRequest.getNoOfAdults(), searchRequest.getNoOfChildren());
+            List<Long> availableRoomIds = roomRepository.findAvailableRoomIds(
                     business.getBusinessId(),
                     searchRequest.getCheckInDate(),
                     searchRequest.getCheckOutDate(),
-                    calculateCapacity(searchRequest.getNoOfAdults(), searchRequest.getNoOfChildren())
+                    capacity
             );
-
-            return businessMapper.mapToSearchDto(business, availableRooms);
+            int availableRooms = availableRoomIds.size();
+            ResponseSearchDTO responseSearchDTO = businessMapper.mapToSearchDto(business, availableRooms);
+            responseSearchDTO.setAvailableRoomIds(Set.copyOf(availableRoomIds));
+            return responseSearchDTO;
         });
 
 
@@ -187,6 +201,12 @@ public class BusinessServiceImpl implements BusinessService {
     @Transactional
     public /*ResponseBusinessDTO*/String saveBusiness(RequestBusinessDTO requestBusinessDTO, String username) {
 
+
+        Optional<Businesses> doesBusinessExist = businessRepository.findByBusinessName(requestBusinessDTO.getName());
+
+        if (doesBusinessExist.isPresent()) {
+            throw new RecordAlreadyExistsException("Business with the same name already exists");
+        }
         Businesses businesses = businessMapper.mapToEntity(requestBusinessDTO);
 
         User user = userRepository.findUserByUsername(username)

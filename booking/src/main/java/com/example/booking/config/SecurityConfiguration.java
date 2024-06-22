@@ -72,6 +72,7 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.GET, "/webjars/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/v2/api-docs").permitAll()
                         .requestMatchers(HttpMethod.GET, "/swagger-ui/index.html").permitAll()
+                        .requestMatchers("/images/businesses/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -109,17 +110,5 @@ public class SecurityConfiguration {
         return source;
     }
 
-//    @Bean
-//    public WebMvcConfigurer corsConfigurer() {
-//        return new WebMvcConfigurer() {
-//            @Override
-//            public void addCorsMappings(CorsRegistry registry) {
-//                registry.addMapping("/**")
-//                        .allowedOrigins("http://192.168.1.78:3000")
-//                        .allowedMethods("*")
-//                        .allowedHeaders("*")
-//                        .allowCredentials(true);
-//            }
-//        };
-//    }
+
 }

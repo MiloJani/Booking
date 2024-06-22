@@ -15,12 +15,16 @@ public class RequestBusinessDTO {
     @Schema(example = "Milo's Amazing Hotel")
     private String name;
 
+    @NotBlank(message = "FreeParking field is mandatory")
     private String freeParking;
 
+    @NotBlank(message = "FreeWifi field is mandatory")
     private String freeWifi;
 
+    @NotBlank(message = "InsidePool field is mandatory")
     private String insidePool;
 
+    @NotBlank(message = "FreeBreakfast field is mandatory")
     private String  freeBreakfast;
 
     @NotNull(message = "Image file cannot be null")
