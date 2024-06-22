@@ -120,6 +120,6 @@ public class BusinessMapper {
             String fileUrl = "http://" + serverIp + ":8080/images/businesses/" + imageFileName;
             return fileUrl;
         }
-        return null;
+        return null; //change later
     }
 }
