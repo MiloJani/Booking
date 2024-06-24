@@ -17,6 +17,10 @@ import com.example.booking.dataproviders.repositories.UserRepository;
 import com.example.booking.dataproviders.services.RoomService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -54,7 +58,7 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public Set<ResponseRoomDTO> getAllAvailableRooms(RequestAvailableRoomsDTO requestAvailableRoomsDTO,String username){
+    public Page<ResponseRoomDTO> getAllAvailableRooms(RequestAvailableRoomsDTO requestAvailableRoomsDTO,String username){
 
 
         User user = userRepository.findUserByUsername(username)
@@ -64,16 +68,13 @@ public class RoomServiceImpl implements RoomService {
             throw new AuthenticationFailedException("User does not have sufficient privileges to add a business");
         }
 
-        Set<Rooms> rooms = roomRepository.findByBusinesses_BusinessIdAndRoomIdIn(requestAvailableRoomsDTO.getBusinessId(),
-                requestAvailableRoomsDTO.getRoomIds());
+        int size = 2;
+        Pageable pageable = PageRequest.of(requestAvailableRoomsDTO.getPage(), size, Sort.by("price").ascending());
+        Page<Rooms> rooms = roomRepository.findByBusinesses_BusinessIdAndRoomIdIn(requestAvailableRoomsDTO.getBusinessId(),
+                requestAvailableRoomsDTO.getRoomIds(),pageable);
 
-        List<Rooms> sortedRooms = rooms.stream()
-                .sorted(Comparator.comparing(Rooms::getPrice))
-                .collect(Collectors.toList());
 
-        return sortedRooms.stream()
-                .map(roomMapper::mapToDto)
-                .collect(Collectors.toCollection(LinkedHashSet::new));
+        return rooms.map(room -> roomMapper.mapToDto(room));
     }
 
     @Override
@@ -107,7 +108,7 @@ public class RoomServiceImpl implements RoomService {
             }
             try {
 
-                String uploadDir = "C:\\Users\\USER\\Desktop\\BookingProject\\Booking\\booking\\src\\main\\resources\\images\\rooms\\";
+                String uploadDir = "C:\\Users\\USER\\Desktop\\SavedPhotos\\Rooms\\";
 
                 String fileName = System.currentTimeMillis() + "_" + image.getOriginalFilename();
 

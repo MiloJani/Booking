@@ -31,11 +31,11 @@ public class RoomMapper {
     private String getRoomImageUrl(String imageFileName) {
         if (imageFileName != null) {
             String serverIp = NetworkUtils.getServerIpAddress();
-            String fileUrl = "http://" + serverIp + ":8080/images/rooms/" + imageFileName;
+            String fileUrl = "http://" + serverIp + ":8080/SavedPhotos/Rooms/" + imageFileName;
             return fileUrl;
         }else {
             String serverIp = NetworkUtils.getServerIpAddress();
-            return "http://" + serverIp + ":8080/images/rooms/default.png";
+            return "http://" + serverIp + ":8080/SavedPhotos/Rooms/default.png";
         }
     }
 

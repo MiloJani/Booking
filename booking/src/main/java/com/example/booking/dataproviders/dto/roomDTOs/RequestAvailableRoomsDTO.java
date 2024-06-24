@@ -15,4 +15,6 @@ public class RequestAvailableRoomsDTO {
 
     @NotNull
     private Set<Long> roomIds;
+
+    private int page;
 }

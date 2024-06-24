@@ -87,8 +87,8 @@ public class BusinessServiceImpl implements BusinessService {
             throw new NotCorrectDataException("Check in date and check out date should both be today or after");
         }
 
-        int page = 0;
-        int size = 20;
+        int page = searchRequest.getPage();
+        int size = 2;
         Pageable pageable = PageRequest.of(page, size);
         Page<Businesses> businessesPage = businessRepository.findAll(pageable);
 
@@ -235,7 +235,7 @@ public class BusinessServiceImpl implements BusinessService {
             }
             try {
 
-                String uploadDir = "C:\\Users\\USER\\Desktop\\BookingProject\\Booking\\booking\\src\\main\\resources\\images\\businesses\\";
+                String uploadDir = "C:\\Users\\USER\\Desktop\\SavedPhotos\\Businesses\\";
 
                 String fileName = System.currentTimeMillis() + "_" + image.getOriginalFilename();
 

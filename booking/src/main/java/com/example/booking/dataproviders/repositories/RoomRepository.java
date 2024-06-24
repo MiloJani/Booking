@@ -2,6 +2,8 @@ package com.example.booking.dataproviders.repositories;
 
 import com.example.booking.dataproviders.entities.Businesses;
 import com.example.booking.dataproviders.entities.Rooms;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -87,6 +89,6 @@ int countAvailableRooms(
 
     Optional<Rooms> findByRoomNameAndBusinesses(String roomName, Businesses businesses);
 
-    Set<Rooms> findByBusinesses_BusinessIdAndRoomIdIn(Long businessId, Set<Long> roomIds);
+    Page<Rooms> findByBusinesses_BusinessIdAndRoomIdIn(Long businessId, Set<Long> roomIds, Pageable pageable);
 
 }

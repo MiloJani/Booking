@@ -13,5 +13,6 @@ public class RequestSearchDTO {
     private LocalDate checkOutDate;
     private Integer noOfAdults;
     private Integer noOfChildren;
+    private int page;
 
 }
