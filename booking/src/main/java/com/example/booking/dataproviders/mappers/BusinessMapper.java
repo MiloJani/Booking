@@ -119,7 +119,9 @@ public class BusinessMapper {
             String serverIp = NetworkUtils.getServerIpAddress();
             String fileUrl = "http://" + serverIp + ":8080/images/businesses/" + imageFileName;
             return fileUrl;
+        }else {
+            String serverIp = NetworkUtils.getServerIpAddress();
+            return "http://" + serverIp + ":8080/images/businesses/default.png";
         }
-        return null; //change later
     }
 }

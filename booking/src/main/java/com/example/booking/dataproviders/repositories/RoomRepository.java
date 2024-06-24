@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface RoomRepository extends JpaRepository<Rooms,Long> {
@@ -85,4 +86,7 @@ int countAvailableRooms(
 
 
     Optional<Rooms> findByRoomNameAndBusinesses(String roomName, Businesses businesses);
+
+    Set<Rooms> findByBusinesses_BusinessIdAndRoomIdIn(Long businessId, Set<Long> roomIds);
+
 }

@@ -59,5 +59,15 @@ public class GlobalExceptionHandler {
                 ex.getMessage());
     }
 
+    @ExceptionHandler(value
+            = NotCorrectDataException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public @ResponseBody ErrorResponse
+    handleNotEnoughDataException(
+            NotCorrectDataException ex) {
+        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(),
+                ex.getMessage());
+    }
+
 
 }

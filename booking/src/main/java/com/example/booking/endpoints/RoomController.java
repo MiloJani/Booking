@@ -2,6 +2,7 @@ package com.example.booking.endpoints;
 
 import com.example.booking.dataproviders.dto.businessDTOs.RequestBusinessDTO;
 import com.example.booking.dataproviders.dto.businessDTOs.ResponseBusinessDTO;
+import com.example.booking.dataproviders.dto.roomDTOs.RequestAvailableRoomsDTO;
 import com.example.booking.dataproviders.dto.roomDTOs.RequestRoomDTO;
 import com.example.booking.dataproviders.dto.roomDTOs.ResponseRoomDTO;
 import com.example.booking.dataproviders.services.RoomService;
@@ -36,6 +37,23 @@ public class RoomController {
     @GetMapping("/findById/{id}")
     public ResponseEntity<ResponseRoomDTO> findById(@PathVariable Long id) {
         return ResponseEntity.ok(roomService.findRoomById(id));
+    }
+
+    @PostMapping("/getAvailableRooms")
+    public ResponseEntity<?> getAvailableRooms(@Valid @RequestBody RequestAvailableRoomsDTO requestAvailableRoomsDTO,
+                                               BindingResult bindingResult) {
+
+        if (bindingResult.hasErrors()) {
+            List<String> errors = bindingResult.getAllErrors().stream()
+                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                    .collect(Collectors.toList());
+            return ResponseEntity.badRequest().body(errors);
+        }
+
+        SecurityContext context = SecurityContextHolder.getContext();
+        String username = context.getAuthentication().getName();
+        return new ResponseEntity<>(roomService.getAllAvailableRooms(requestAvailableRoomsDTO,username), HttpStatus.OK);
+
     }
 
     @PostMapping("/save")

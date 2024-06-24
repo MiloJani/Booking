@@ -49,21 +49,27 @@ public class SecurityConfiguration {
                                 new CorsConfiguration().applyPermitDefaultValues()
                         ))
                 .authorizeHttpRequests(auth -> auth
+
                         .requestMatchers(GET,"/api/booking/findAll","/api/booking/findById/"
                                 ,"/api/userInfo/findById/").hasAuthority("USER")
                         .requestMatchers(GET,"/api/businesses/admin").hasAuthority("ADMIN")
                         .requestMatchers(GET,"/api/users/findAll","/api/businesses/findAll","/api/businesses/findById/"
                                 , "/api/rooms/findAll","/api/rooms/findById/"
                                 ,"/api/roomPricing/findAll","/api/roomPricing/findById/","/api/businesses/prove").permitAll()
+
                         .requestMatchers(POST,"/api/auth/**").permitAll()
-                        .requestMatchers(POST,"/api/booking/save").hasAuthority("USER")
+                        .requestMatchers(POST,"/api/booking/save","/api/businesses/search"
+                                ,"/api/rooms/getAvailableRooms").hasAuthority("USER")
                         .requestMatchers(POST,"/api/businesses/save"
                                 ,"/api/rooms/save","/api/roomPricing/save").hasAuthority("ADMIN")
+
                         .requestMatchers(PUT,"/api/businesses/update/","/api/rooms/update/"
                                 ,"/api/roomPricing/update/").hasAuthority("ADMIN")
+
                         .requestMatchers(DELETE,"/api/booking/delete/").hasAuthority("USER")
                         .requestMatchers(DELETE,"/api/businesses/delete/","/api/rooms/delete/"
                                 ,"/api/roomPricing/update/").hasAuthority("ADMIN")
+
                         .requestMatchers(HttpMethod.GET, "/swagger-ui/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/v3/api-docs/**").permitAll()
                         .requestMatchers("/api-docs/**").permitAll()
@@ -72,7 +78,7 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.GET, "/webjars/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/v2/api-docs").permitAll()
                         .requestMatchers(HttpMethod.GET, "/swagger-ui/index.html").permitAll()
-                        .requestMatchers("/images/businesses/**").permitAll()
+                        .requestMatchers("/images/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

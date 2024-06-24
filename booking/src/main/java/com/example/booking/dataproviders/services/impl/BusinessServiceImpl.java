@@ -1,15 +1,10 @@
 package com.example.booking.dataproviders.services.impl;
 
-import com.example.booking.core.exceptions.AuthenticationFailedException;
-import com.example.booking.core.exceptions.FileCouldNotBeSavedException;
-import com.example.booking.core.exceptions.RecordAlreadyExistsException;
-import com.example.booking.core.exceptions.RecordNotFoundException;
+import com.example.booking.core.exceptions.*;
 import com.example.booking.dataproviders.dto.businessDTOs.RequestBusinessDTO;
 import com.example.booking.dataproviders.dto.businessDTOs.ResponseBusinessDTO;
-import com.example.booking.dataproviders.dto.businessDTOs.ResponseBusinessSearchDTO;
 import com.example.booking.dataproviders.dto.searchDTOs.RequestSearchDTO;
 import com.example.booking.dataproviders.dto.searchDTOs.ResponseSearchDTO;
-import com.example.booking.dataproviders.entities.Booking;
 import com.example.booking.dataproviders.entities.Businesses;
 import com.example.booking.dataproviders.entities.User;
 import com.example.booking.dataproviders.mappers.BusinessMapper;
@@ -17,21 +12,16 @@ import com.example.booking.dataproviders.repositories.BusinessRepository;
 import com.example.booking.dataproviders.repositories.RoomRepository;
 import com.example.booking.dataproviders.repositories.UserRepository;
 import com.example.booking.dataproviders.services.BusinessService;
-import jakarta.persistence.criteria.JoinType;
-import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -90,6 +80,13 @@ public class BusinessServiceImpl implements BusinessService {
 
     @Override
     public Page<ResponseSearchDTO> search(RequestSearchDTO searchRequest) {
+
+        if (searchRequest.getCheckInDate()==null || searchRequest.getCheckOutDate()==null){
+            throw new NotCorrectDataException("Check in date and check out date should both be filled");
+        }else if (searchRequest.getCheckInDate().isBefore(LocalDate.now()) || searchRequest.getCheckOutDate().isBefore(LocalDate.now())){
+            throw new NotCorrectDataException("Check in date and check out date should both be today or after");
+        }
+
         int page = 0;
         int size = 20;
         Pageable pageable = PageRequest.of(page, size);
@@ -130,44 +127,53 @@ public class BusinessServiceImpl implements BusinessService {
 
 
     //    //Search begin
+//    @Override
 //    public Page<ResponseSearchDTO> search(RequestSearchDTO searchRequest) {
+//
+//        if (searchRequest.getCheckInDate() == null || searchRequest.getCheckOutDate() == null) {
+//            throw new NotCorrectDataException("Check in date and check out date should both be filled");
+//        } else if (searchRequest.getCheckInDate().isBefore(LocalDate.now()) || searchRequest.getCheckOutDate().isBefore(LocalDate.now())) {
+//            throw new NotCorrectDataException("Check in date and check out date should both be today or after");
+//        }
+//
 //        int page = 0;
 //        int size = 20;
 //        Pageable pageable = PageRequest.of(page, size);
 //
 //        Specification<Businesses> spec = (root, query, criteriaBuilder) -> {
-//            var roomJoin = root.join("rooms", JoinType.LEFT);
-//
+//            Join<Businesses, Rooms> roomJoin = root.join("rooms", JoinType.LEFT);
 //            List<Predicate> predicates = new ArrayList<>();
 //
-//            // Check for non-overlapping bookings
 //            if (searchRequest.getCheckInDate() != null && searchRequest.getCheckOutDate() != null) {
 //                LocalDate checkInDate = searchRequest.getCheckInDate();
 //                LocalDate checkOutDate = searchRequest.getCheckOutDate();
 //
-//                var subquery = query.subquery(Long.class);
-//                var bookingRoot = subquery.from(Booking.class);
+//                Subquery<Long> subquery = query.subquery(Long.class);
+//                Root<Booking> bookingRoot = subquery.from(Booking.class);
 //                subquery.select(bookingRoot.get("room").get("roomId"))
-//                        .where(
-//                                criteriaBuilder.and(
-//                                        criteriaBuilder.equal(bookingRoot.get("room").get("businesses").get("businessId"), root.get("businessId")),
-//                                        criteriaBuilder.or(
-//                                                // Allow rooms where the requested period is before the booking period
-//                                                criteriaBuilder.lessThan(criteriaBuilder.literal(checkOutDate), bookingRoot.get("checkInDate")),
-//                                                // Allow rooms where the requested period is after the booking period
-//                                                criteriaBuilder.greaterThan(criteriaBuilder.literal(checkInDate), bookingRoot.get("checkOutDate")),
-//                                                criteriaBuilder.greaterThan(criteriaBuilder.literal(checkOutDate), bookingRoot.get("checkOutDate"))
+//                        .where(criteriaBuilder.and(
+//                                criteriaBuilder.equal(bookingRoot.get("room").get("businesses").get("businessId"), root.get("businessId")),
+//                                criteriaBuilder.or(
+//                                        criteriaBuilder.and(
+//                                                criteriaBuilder.lessThanOrEqualTo(bookingRoot.get("checkInDate"), checkOutDate),
+//                                                criteriaBuilder.greaterThanOrEqualTo(bookingRoot.get("checkOutDate"), checkInDate)
+//                                        ),
+//                                        criteriaBuilder.and(
+//                                                criteriaBuilder.equal(bookingRoot.get("checkInDate"), checkInDate),
+//                                                criteriaBuilder.equal(bookingRoot.get("checkOutDate"), checkOutDate)
+//                                        ),
+//                                        criteriaBuilder.and(
+//                                                criteriaBuilder.equal(checkInDate, bookingRoot.get("checkOutDate")),
+//                                                criteriaBuilder.equal(checkOutDate, bookingRoot.get("checkInDate"))
 //                                        )
 //                                )
-//                        );
-//                var subqueryPredicate = criteriaBuilder.not(criteriaBuilder.in(roomJoin.get("roomId")).value(subquery));
-//                predicates.add(subqueryPredicate);
+//                        ));
+//
+//                predicates.add(criteriaBuilder.not(criteriaBuilder.in(roomJoin.get("roomId")).value(subquery)));
 //            }
 //
-//            // Check room capacity
 //            if (searchRequest.getNoOfAdults() != null || searchRequest.getNoOfChildren() != null) {
-//                int totalGuests = (searchRequest.getNoOfAdults() != null ? searchRequest.getNoOfAdults() : 0) +
-//                        (searchRequest.getNoOfChildren() != null ? searchRequest.getNoOfChildren() : 0);
+//                int totalGuests = calculateCapacity(searchRequest.getNoOfAdults(), searchRequest.getNoOfChildren());
 //                if (totalGuests > 0) {
 //                    predicates.add(criteriaBuilder.ge(roomJoin.get("capacity"), totalGuests));
 //                }
@@ -180,21 +186,25 @@ public class BusinessServiceImpl implements BusinessService {
 //        Page<Businesses> businessesPage = businessRepository.findAll(spec, pageable);
 //
 //        return businessesPage.map(business -> {
-//            // Calculate available rooms based on capacity
-//            int totalGuests = (searchRequest.getNoOfAdults() != null ? searchRequest.getNoOfAdults() : 0) +
-//                    (searchRequest.getNoOfChildren() != null ? searchRequest.getNoOfChildren() : 0);
+//            int totalGuests = calculateCapacity(searchRequest.getNoOfAdults(), searchRequest.getNoOfChildren());
 //
-//            int availableRooms = (int) business.getRooms().stream()
-//                    .filter(room -> room.getCapacity() >= totalGuests)
-//                    .count();
+//            List<Long> availableRoomIds = roomRepository.findAvailableRoomIds(
+//                    business.getBusinessId(),
+//                    searchRequest.getCheckInDate(),
+//                    searchRequest.getCheckOutDate(),
+//                    totalGuests
+//            );
 //
-//            return businessMapper.mapToSearchDto(business, availableRooms);
+//            int availableRooms = availableRoomIds.size();
+//            ResponseSearchDTO responseSearchDTO = businessMapper.mapToSearchDto(business, availableRooms);
+//            responseSearchDTO.setAvailableRoomIds(Set.copyOf(availableRoomIds));
+//            return responseSearchDTO;
 //        });
 //    }
 //
-//
-//
-
+//    private Integer calculateCapacity(Integer noOfAdults, Integer noOfChildren) {
+//        return (noOfAdults != null ? noOfAdults : 0) + (noOfChildren != null ? noOfChildren : 0);
+//    }
 //    //Search end
 
     @Override

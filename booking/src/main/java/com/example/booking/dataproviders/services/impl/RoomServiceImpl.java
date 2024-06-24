@@ -4,6 +4,7 @@ import com.example.booking.core.exceptions.AuthenticationFailedException;
 import com.example.booking.core.exceptions.FileCouldNotBeSavedException;
 import com.example.booking.core.exceptions.RecordAlreadyExistsException;
 import com.example.booking.core.exceptions.RecordNotFoundException;
+import com.example.booking.dataproviders.dto.roomDTOs.RequestAvailableRoomsDTO;
 import com.example.booking.dataproviders.dto.roomDTOs.RequestRoomDTO;
 import com.example.booking.dataproviders.dto.roomDTOs.ResponseRoomDTO;
 import com.example.booking.dataproviders.entities.Businesses;
@@ -21,8 +22,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -50,6 +51,29 @@ public class RoomServiceImpl implements RoomService {
 
         Rooms room = roomRepository.findById(id).orElseThrow(() -> new RuntimeException("Room not found"));
         return roomMapper.mapToDto(room);
+    }
+
+    @Override
+    public Set<ResponseRoomDTO> getAllAvailableRooms(RequestAvailableRoomsDTO requestAvailableRoomsDTO,String username){
+
+
+        User user = userRepository.findUserByUsername(username)
+                .orElseThrow(() -> new RecordNotFoundException("User not found"));
+
+        if (!user.getRole().getRoleName().equals("USER")) {
+            throw new AuthenticationFailedException("User does not have sufficient privileges to add a business");
+        }
+
+        Set<Rooms> rooms = roomRepository.findByBusinesses_BusinessIdAndRoomIdIn(requestAvailableRoomsDTO.getBusinessId(),
+                requestAvailableRoomsDTO.getRoomIds());
+
+        List<Rooms> sortedRooms = rooms.stream()
+                .sorted(Comparator.comparing(Rooms::getPrice))
+                .collect(Collectors.toList());
+
+        return sortedRooms.stream()
+                .map(roomMapper::mapToDto)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     @Override
