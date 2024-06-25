@@ -2,6 +2,7 @@ package com.example.booking.dataproviders.services.impl;
 
 import com.example.booking.dataproviders.dto.roomPricingDTOs.RequestRoomPricingDTO;
 import com.example.booking.dataproviders.dto.roomPricingDTOs.ResponseRoomPricingDTO;
+import com.example.booking.dataproviders.dto.roomPricingDTOs.ResponseRoomsPricingDTO;
 import com.example.booking.dataproviders.entities.RoomPricing;
 import com.example.booking.dataproviders.entities.Rooms;
 import com.example.booking.dataproviders.mappers.RoomPricingMapper;
@@ -9,13 +10,19 @@ import com.example.booking.dataproviders.repositories.RoomPricingRepository;
 import com.example.booking.dataproviders.repositories.RoomRepository;
 import com.example.booking.dataproviders.services.RoomPricingService;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class RoomPricingServiceImpl implements RoomPricingService {
 
     private final RoomPricingRepository roomPricingRepository;
@@ -34,12 +41,33 @@ public class RoomPricingServiceImpl implements RoomPricingService {
     }
 
     @Override
+    public List<ResponseRoomsPricingDTO> getWeekRoomPricings(Long roomId) {
+        List<RoomPricing> roomPricings = roomPricingRepository.findByRoom_RoomId(roomId);
+
+        LocalDate today = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM");
+
+        return today.datesUntil(today.plusDays(7))
+                .map(date -> {
+                    RoomPricing pricing = roomPricings.stream()
+                            .filter(p -> p.getDayOfWeek() == date.getDayOfWeek())
+                            .findFirst()
+                            .orElseThrow(() -> new RuntimeException("Room pricing not found for " + date.getDayOfWeek()));
+                    return new ResponseRoomsPricingDTO(date.format(formatter), pricing.getPrice());
+                })
+                .collect(Collectors.toList());
+    }
+
+
+    @Override
     public ResponseRoomPricingDTO findRoomPricingById(Long id) {
 
         RoomPricing roomPricing = roomPricingRepository.findById(id).orElseThrow(() -> new RuntimeException("Room pricing not found"));
 
         return roomPricingMapper.mapToDto(roomPricing);
     }
+
+
 
     @Override
     public ResponseRoomPricingDTO saveRoomPricing(RequestRoomPricingDTO requestRoomPricingDTO) {
@@ -69,4 +97,32 @@ public class RoomPricingServiceImpl implements RoomPricingService {
 
         roomPricingRepository.delete(roomPricing);
     }
+
+    public void createDefaultRoomPricings(Rooms room) {
+        EnumSet.allOf(DayOfWeek.class).forEach(dayOfWeek -> {
+            RoomPricing roomPricing = new RoomPricing();
+            roomPricing.setRoom(room);
+            roomPricing.setDayOfWeek(dayOfWeek);
+            roomPricing.setPrice(getAdjustedPriceForDay(room.getPrice(), dayOfWeek));
+            roomPricingRepository.save(roomPricing);
+        });
+    }
+
+    private Double getAdjustedPriceForDay(Double basePrice, DayOfWeek dayOfWeek) {
+        double adjustedPrice = switch (dayOfWeek) {
+            case MONDAY -> basePrice - 100.0;
+            case TUESDAY -> basePrice - 50.0;
+            case WEDNESDAY -> basePrice + 20.0;
+            case THURSDAY -> basePrice + 30.0;
+            case FRIDAY -> basePrice + 50.0;
+            case SATURDAY -> basePrice + 70.0;
+            case SUNDAY -> basePrice + 60.0;
+//            default -> throw new IllegalArgumentException("Invalid day of week");
+        };
+        if (adjustedPrice < 0) {
+            adjustedPrice = basePrice;
+        }
+        return adjustedPrice;
+    }
+
 }

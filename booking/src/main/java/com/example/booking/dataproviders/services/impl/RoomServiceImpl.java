@@ -37,6 +37,7 @@ public class RoomServiceImpl implements RoomService {
     private BusinessRepository businessRepository;
     private UserRepository userRepository;
     private RoomMapper roomMapper;
+    private final RoomPricingServiceImpl roomPricingServiceImpl;
 
 
     @Override
@@ -125,7 +126,7 @@ public class RoomServiceImpl implements RoomService {
         rooms.setBusinesses(businesses);
 
         Rooms savedRoom = roomRepository.save(rooms);
-
+        roomPricingServiceImpl.createDefaultRoomPricings(savedRoom);
 //        return roomMapper.mapToDto(savedRoom);
 
         return "Room saved successfully";

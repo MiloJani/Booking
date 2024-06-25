@@ -4,6 +4,7 @@ import com.example.booking.dataproviders.dto.roomDTOs.RequestRoomDTO;
 import com.example.booking.dataproviders.dto.roomDTOs.ResponseRoomDTO;
 import com.example.booking.dataproviders.dto.roomPricingDTOs.RequestRoomPricingDTO;
 import com.example.booking.dataproviders.dto.roomPricingDTOs.ResponseRoomPricingDTO;
+import com.example.booking.dataproviders.dto.roomPricingDTOs.ResponseRoomsPricingDTO;
 import com.example.booking.dataproviders.services.RoomPricingService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -31,6 +32,11 @@ public class RoomPricingController {
     @GetMapping("/findById/{id}")
     public ResponseEntity<ResponseRoomPricingDTO> findById(@PathVariable Long id) {
         return ResponseEntity.ok(roomPricingService.findRoomPricingById(id));
+    }
+
+    @GetMapping("/rooms/{roomId}/pricings")
+    public List<ResponseRoomsPricingDTO> getRoomPricings(@PathVariable Long roomId) {
+        return roomPricingService.getWeekRoomPricings(roomId);
     }
 
     @PostMapping("/save")

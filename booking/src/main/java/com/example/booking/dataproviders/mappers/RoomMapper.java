@@ -7,6 +7,10 @@ import com.example.booking.dataproviders.entities.Rooms;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.net.*;
+import java.util.Enumeration;
+
 @Component
 @AllArgsConstructor
 public class RoomMapper {
@@ -28,15 +32,30 @@ public class RoomMapper {
         return responseRoomDTO;
     }
 
+    public static String getPublicIpAddress() {
+        try (final DatagramSocket datagramSocket = new DatagramSocket()) {
+            datagramSocket.connect(InetAddress.getByName("8.8.8.8"), 12345);
+            return datagramSocket.getLocalAddress().getHostAddress();
+        } catch (IOException e) {
+            e.printStackTrace(); // Handle exception as needed
+            return "Failed to retrieve public IP";
+        }
+    }
+
     private String getRoomImageUrl(String imageFileName) {
+
+//        String serverIp = "192.168.1.32";
+        String serverIp = getPublicIpAddress();
+
+
         if (imageFileName != null) {
-            String serverIp = NetworkUtils.getServerIpAddress();
             String fileUrl = "http://" + serverIp + ":8080/SavedPhotos/Rooms/" + imageFileName;
             return fileUrl;
         }else {
-            String serverIp = NetworkUtils.getServerIpAddress();
             return "http://" + serverIp + ":8080/SavedPhotos/Rooms/default.png";
         }
+
+
     }
 
     public Rooms mapToEntity(RequestRoomDTO requestRoomDTO){

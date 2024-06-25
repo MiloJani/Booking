@@ -15,6 +15,8 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -114,13 +116,33 @@ public class BusinessMapper {
 //        return null;
 //    }
 
-    private String getBusinessImageUrl(String imageFileName) {
+//    private String getBusinessImageUrl(String imageFileName) {
+//        //            String serverIp = NetworkUtils.getServerIpAddress();
+//        String serverIp = "192.168.1.32";
+//        if (imageFileName != null) {
+//            String fileUrl = "http://" + serverIp + ":8080/SavedPhotos/Businesses/" + imageFileName;
+//            return fileUrl;
+//        }else {
+//            return "http://" + serverIp + ":8080/SavedPhotos/Businesses/default.png";
+//        }
+//    }
+
+    public static String getPublicIpAddress() {
+        try (final DatagramSocket datagramSocket = new DatagramSocket()) {
+            datagramSocket.connect(InetAddress.getByName("8.8.8.8"), 12345);
+            return datagramSocket.getLocalAddress().getHostAddress();
+        } catch (IOException e) {
+            e.printStackTrace(); // Handle exception as needed
+            return "Failed to retrieve public IP";
+        }
+    }
+
+    public String getBusinessImageUrl(String imageFileName) {
+        String serverIp = getPublicIpAddress(); // dynamic ip
+
         if (imageFileName != null) {
-            String serverIp = NetworkUtils.getServerIpAddress();
-            String fileUrl = "http://" + serverIp + ":8080/SavedPhotos/Businesses/" + imageFileName;
-            return fileUrl;
-        }else {
-            String serverIp = NetworkUtils.getServerIpAddress();
+            return "http://" + serverIp + ":8080/SavedPhotos/Businesses/" + imageFileName;
+        } else {
             return "http://" + serverIp + ":8080/SavedPhotos/Businesses/default.png";
         }
     }
