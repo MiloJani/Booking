@@ -1,9 +1,6 @@
 package com.example.booking.dataproviders.services.impl;
 
-import com.example.booking.core.exceptions.AuthenticationFailedException;
-import com.example.booking.core.exceptions.FileCouldNotBeSavedException;
-import com.example.booking.core.exceptions.RecordAlreadyExistsException;
-import com.example.booking.core.exceptions.RecordNotFoundException;
+import com.example.booking.core.exceptions.*;
 import com.example.booking.dataproviders.dto.roomDTOs.RequestAvailableRoomsDTO;
 import com.example.booking.dataproviders.dto.roomDTOs.RequestRoomDTO;
 import com.example.booking.dataproviders.dto.roomDTOs.ResponseRoomDTO;
@@ -26,6 +23,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -58,25 +57,77 @@ public class RoomServiceImpl implements RoomService {
         return roomMapper.mapToDto(room);
     }
 
-    @Override
-    public Page<ResponseRoomDTO> getAllAvailableRooms(RequestAvailableRoomsDTO requestAvailableRoomsDTO,String username){
+//    @Override
+//    public Page<ResponseRoomDTO> getAllAvailableRooms(RequestAvailableRoomsDTO requestAvailableRoomsDTO,String username){
+//
+//
+//        User user = userRepository.findUserByUsername(username)
+//                .orElseThrow(() -> new RecordNotFoundException("User not found"));
+//
+//        if (!user.getRole().getRoleName().equals("USER")) {
+//            throw new AuthenticationFailedException("User does not have sufficient privileges to add a business");
+//        }
+//
+//        int size = 2;
+//        Pageable pageable = PageRequest.of(requestAvailableRoomsDTO.getPage(), size, Sort.by("price").ascending());
+//        Page<Rooms> rooms = roomRepository.findByBusinesses_BusinessIdAndRoomIdIn(requestAvailableRoomsDTO.getBusinessId(),
+//                requestAvailableRoomsDTO.getRoomIds(),pageable);
+//
+//
+//        return rooms.map(room -> roomMapper.mapToDto(room));
+//    }
 
+    @Override
+    public Page<ResponseRoomDTO> getAllAvailableRooms(RequestAvailableRoomsDTO requestAvailableRoomsDTO, String username) {
 
         User user = userRepository.findUserByUsername(username)
                 .orElseThrow(() -> new RecordNotFoundException("User not found"));
 
         if (!user.getRole().getRoleName().equals("USER")) {
-            throw new AuthenticationFailedException("User does not have sufficient privileges to add a business");
+            throw new AuthenticationFailedException("User does not have sufficient privileges to view available rooms");
+        }
+
+        LocalDate checkInDate;
+        LocalDate checkOutDate;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        try {
+            checkInDate = LocalDate.parse(requestAvailableRoomsDTO.getCheckInDate(), formatter);
+            checkOutDate = LocalDate.parse(requestAvailableRoomsDTO.getCheckOutDate(), formatter);
+        } catch (Exception e) {
+            throw new NotCorrectDataException("Invalid date format. Please provide dates in yyyy-MM-dd format.");
         }
 
         int size = 2;
-        Pageable pageable = PageRequest.of(requestAvailableRoomsDTO.getPage(), size, Sort.by("price").ascending());
-        Page<Rooms> rooms = roomRepository.findByBusinesses_BusinessIdAndRoomIdIn(requestAvailableRoomsDTO.getBusinessId(),
-                requestAvailableRoomsDTO.getRoomIds(),pageable);
+        Sort sort = Sort.by(Sort.Direction.ASC, "price"); // Default sort by price ascending
+        if ("desc".equalsIgnoreCase(requestAvailableRoomsDTO.getSortDirection())) {
+            sort = Sort.by(Sort.Direction.DESC, requestAvailableRoomsDTO.getSortBy());
+        } else if ("asc".equalsIgnoreCase(requestAvailableRoomsDTO.getSortDirection())) {
+            sort = Sort.by(Sort.Direction.ASC, requestAvailableRoomsDTO.getSortBy());
+        }
 
+        Pageable pageable = PageRequest.of(requestAvailableRoomsDTO.getPage(), size, sort);
+
+        // Assuming roomRepository has a method to find available rooms by business ID and capacity
+        List<Long> availableRoomIds = roomRepository.findAvailableRoomIds(
+                requestAvailableRoomsDTO.getBusinessId(),
+                checkInDate,
+                checkOutDate,
+                requestAvailableRoomsDTO.getCapacity()
+        );
+
+        Page<Rooms> rooms = roomRepository.findByBusinesses_BusinessIdAndRoomIdIn(
+                requestAvailableRoomsDTO.getBusinessId(),
+                Set.copyOf(availableRoomIds),
+                pageable
+        );
 
         return rooms.map(room -> roomMapper.mapToDto(room));
     }
+
+
+
+
+
 
     @Override
     @Transactional

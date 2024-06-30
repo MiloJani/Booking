@@ -48,6 +48,9 @@ public class Payment {
     @PositiveOrZero(message = "CVV must be a positive number or zero")
     private Integer cvv;
 
+    @Column(name = "TOTAL_PRICE")
+    private Double totalPrice;
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bookingId")
     private Booking booking;

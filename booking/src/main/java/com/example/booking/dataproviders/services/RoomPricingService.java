@@ -10,7 +10,7 @@ public interface RoomPricingService {
 
     List<ResponseRoomPricingDTO> findAllRoomPricings();
 
-    List<ResponseRoomsPricingDTO> getWeekRoomPricings(Long roomId);
+    List<ResponseRoomsPricingDTO> getWeekRoomPricings(Long roomId,String username);
 
     ResponseRoomPricingDTO findRoomPricingById(Long id);
 

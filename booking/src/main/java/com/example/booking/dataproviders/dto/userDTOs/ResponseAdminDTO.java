@@ -10,7 +10,6 @@ public class ResponseAdminDTO {
     private Long userId;
     private String username;
     private String email;
-    private String password;
     private String phoneNumber;
     private Long roleId;
 }

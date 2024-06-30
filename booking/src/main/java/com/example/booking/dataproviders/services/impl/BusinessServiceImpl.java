@@ -23,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -83,8 +84,22 @@ public class BusinessServiceImpl implements BusinessService {
 
         if (searchRequest.getCheckInDate()==null || searchRequest.getCheckOutDate()==null){
             throw new NotCorrectDataException("Check in date and check out date should both be filled");
-        }else if (searchRequest.getCheckInDate().isBefore(LocalDate.now()) || searchRequest.getCheckOutDate().isBefore(LocalDate.now())){
+        }
+        LocalDate checkInDate;
+        LocalDate checkOutDate;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        try {
+            checkInDate = LocalDate.parse(searchRequest.getCheckInDate(), formatter);
+            checkOutDate = LocalDate.parse(searchRequest.getCheckOutDate(), formatter);
+        } catch (Exception e) {
+            throw new NotCorrectDataException("Invalid date format. Please provide dates in yyyy-MM-dd format.");
+        }
+
+        if (checkInDate.isBefore(LocalDate.now()) || checkOutDate.isBefore(LocalDate.now())){
             throw new NotCorrectDataException("Check in date and check out date should both be today or after");
+
+        }else if (checkOutDate.isBefore(checkInDate)){
+            throw new NotCorrectDataException("Check out date should be the same or after check in date");
         }
 
         int page = searchRequest.getPage();
@@ -105,10 +120,13 @@ public class BusinessServiceImpl implements BusinessService {
 
         return businessesPage.map(business -> {
             int capacity = calculateCapacity(searchRequest.getNoOfAdults(), searchRequest.getNoOfChildren());
+            if (capacity>5){
+                throw new NotCorrectDataException("Maximum capacity exceeded");
+            }
             List<Long> availableRoomIds = roomRepository.findAvailableRoomIds(
                     business.getBusinessId(),
-                    searchRequest.getCheckInDate(),
-                    searchRequest.getCheckOutDate(),
+                    checkInDate,
+                    checkOutDate,
                     capacity
             );
             int availableRooms = availableRoomIds.size();

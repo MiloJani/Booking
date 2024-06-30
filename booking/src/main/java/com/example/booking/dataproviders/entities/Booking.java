@@ -38,6 +38,21 @@ public class Booking {
     @Column(name = "STATUS",nullable = false)
     private String status;
 
+    //booked for
+    @Column(name = "FULL_NAME",nullable = false)
+    private String fullName;
+
+    @Column(name = "EMAIL",nullable = false)
+    private String email;
+
+    @Column(name = "ADDRESS", nullable = false)
+    private String address;
+
+    @Column(name = "PHONE_NUMBER",nullable = false)
+    private String phoneNumber;
+
+    //
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userId")
     private User user;

@@ -11,7 +11,6 @@ public class ResponseUserDTO {
     private Long userId;
     private String username;
     private String email;
-    private String password;
     private String phoneNumber;
     private Long roleId;
     private ResponseUserInfoDTO responseUserInfoDTO;

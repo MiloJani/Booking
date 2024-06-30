@@ -13,9 +13,9 @@ import lombok.Setter;
 @Getter
 public class AuthenticationRequest {
 
-//    @NotBlank(message = "Email is mandatory")
+    @NotBlank(message = "Email is mandatory")
 //    @Email(message = "Please provide a valid email address")
-    @Schema(example = "john.doe@example.com")
+    @Schema(example = "Milo")
     private String email;
 
     @NotBlank(message = "Password is mandatory")

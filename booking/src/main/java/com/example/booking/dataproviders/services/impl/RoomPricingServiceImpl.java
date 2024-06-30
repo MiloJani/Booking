@@ -1,13 +1,17 @@
 package com.example.booking.dataproviders.services.impl;
 
+import com.example.booking.core.exceptions.AuthenticationFailedException;
+import com.example.booking.core.exceptions.RecordNotFoundException;
 import com.example.booking.dataproviders.dto.roomPricingDTOs.RequestRoomPricingDTO;
 import com.example.booking.dataproviders.dto.roomPricingDTOs.ResponseRoomPricingDTO;
 import com.example.booking.dataproviders.dto.roomPricingDTOs.ResponseRoomsPricingDTO;
 import com.example.booking.dataproviders.entities.RoomPricing;
 import com.example.booking.dataproviders.entities.Rooms;
+import com.example.booking.dataproviders.entities.User;
 import com.example.booking.dataproviders.mappers.RoomPricingMapper;
 import com.example.booking.dataproviders.repositories.RoomPricingRepository;
 import com.example.booking.dataproviders.repositories.RoomRepository;
+import com.example.booking.dataproviders.repositories.UserRepository;
 import com.example.booking.dataproviders.services.RoomPricingService;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +32,7 @@ public class RoomPricingServiceImpl implements RoomPricingService {
     private final RoomPricingRepository roomPricingRepository;
     private final RoomRepository roomRepository;
     private final RoomPricingMapper roomPricingMapper;
+    private final UserRepository userRepository;
 
     @Override
     public List<ResponseRoomPricingDTO> findAllRoomPricings() {
@@ -41,7 +46,15 @@ public class RoomPricingServiceImpl implements RoomPricingService {
     }
 
     @Override
-    public List<ResponseRoomsPricingDTO> getWeekRoomPricings(Long roomId) {
+    public List<ResponseRoomsPricingDTO> getWeekRoomPricings(Long roomId,String username) {
+
+        User user = userRepository.findUserByUsername(username)
+                .orElseThrow(() -> new RecordNotFoundException("User not found"));
+
+        if (!user.getRole().getRoleName().equals("USER")) {
+            throw new AuthenticationFailedException("User does not have sufficient privileges to add a business");
+        }
+
         List<RoomPricing> roomPricings = roomPricingRepository.findByRoom_RoomId(roomId);
 
         LocalDate today = LocalDate.now();

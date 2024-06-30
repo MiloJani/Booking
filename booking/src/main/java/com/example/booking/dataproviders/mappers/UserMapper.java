@@ -19,7 +19,6 @@ public class UserMapper {
         dto.setUserId(user.getUserId());
         dto.setUsername(user.getUsername());
         dto.setEmail(user.getEmail());
-        dto.setPassword(passwordEncoder.encode(user.getPassword()));
         dto.setPhoneNumber(user.getPhoneNumber());
         dto.setRoleId(user.getRole().getId());
         dto.setResponseUserInfoDTO(userInfoMapper.mapToDto(user.getUserInfo()));

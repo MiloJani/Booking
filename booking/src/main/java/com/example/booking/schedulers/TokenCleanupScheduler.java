@@ -1,4 +1,4 @@
-package com.example.booking.dataproviders.services.impl;
+package com.example.booking.schedulers;
 
 import com.example.booking.dataproviders.entities.TokenBlacklist;
 import com.example.booking.dataproviders.repositories.TokenBlacklistRepository;

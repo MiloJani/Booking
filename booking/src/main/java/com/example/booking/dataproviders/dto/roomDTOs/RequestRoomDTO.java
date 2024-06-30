@@ -20,7 +20,6 @@ public class RequestRoomDTO {
     private String roomName;
 
     @NotNull(message = "Capacity cannot be null")
-//    @Min(value = 1, message = "Capacity must be at least 1")
     private String capacity;
 
     @NotNull(message = "Price cannot be null")

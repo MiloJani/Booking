@@ -11,6 +11,8 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -36,7 +38,10 @@ public class RoomPricingController {
 
     @GetMapping("/rooms/{roomId}/pricings")
     public List<ResponseRoomsPricingDTO> getRoomPricings(@PathVariable Long roomId) {
-        return roomPricingService.getWeekRoomPricings(roomId);
+
+        SecurityContext context = SecurityContextHolder.getContext();
+        String username = context.getAuthentication().getName();
+        return roomPricingService.getWeekRoomPricings(roomId,username);
     }
 
     @PostMapping("/save")

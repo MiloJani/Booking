@@ -11,15 +11,18 @@ import com.example.booking.dataproviders.entities.*;
 import com.example.booking.dataproviders.mappers.*;
 import com.example.booking.dataproviders.repositories.*;
 import com.example.booking.dataproviders.services.BookingService;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,6 +37,7 @@ public class BookingServiceImpl implements BookingService {
     private UserMapper userMapper;
     private UserInfoRepository userInfoRepository;
     private RoomRepository roomRepository;
+    private RoomPricingRepository roomPricingRepository;
     private BusinessRepository businessRepository;
     private BusinessMapper businessMapper;
     private RoomMapper roomMapper;
@@ -57,12 +61,25 @@ public class BookingServiceImpl implements BookingService {
         return bookingMapper.mapToDto(booking);
     }
 
+    @Override
+    public List<Booking> getBookingHistory(String username) {
+
+        User user = userRepository.findUserByUsername(username).orElseThrow(() -> new RecordNotFoundException("User not found"));
+
+        return bookingRepository.findByUser(user);
+    }
+
 
     @Override
-    public ResponseBookingDTO saveBooking(RequestBookingDTO requestBookingDTO) {
+    @Transactional
+    public ResponseBookingDTO saveBooking(RequestBookingDTO requestBookingDTO,String username) {
 
         Booking booking = bookingMapper.mapToEntity(requestBookingDTO);
+
+        boolean isForAnother = Boolean.parseBoolean(requestBookingDTO.getIsForAnother());
+
         if (booking.getBookingDate().isEqual(booking.getCheckInDate()) ||
+                booking.getBookingDate().isEqual(booking.getCheckOutDate()) ||
                 (booking.getBookingDate().isAfter(booking.getCheckInDate()) &&
                         booking.getBookingDate().isBefore(booking.getCheckOutDate()))){
             booking.setStatus("Checked In");
@@ -72,8 +89,9 @@ public class BookingServiceImpl implements BookingService {
             booking.setStatus("Checked Out");
         }
 
-        User user = userRepository.findById(requestBookingDTO.getUserId()).orElseThrow(() -> new RecordNotFoundException("User not found"));
+        User user = userRepository.findUserByUsername(username).orElseThrow(() -> new RecordNotFoundException("User not found"));
         booking.setUser(user);
+
         int points = user.getUserInfo().getDiscountPoints()+3;
         user.getUserInfo().setDiscountPoints(points);
         userInfoRepository.save(user.getUserInfo());
@@ -81,12 +99,38 @@ public class BookingServiceImpl implements BookingService {
         Rooms room = roomRepository.findById(requestBookingDTO.getRoomId()).orElseThrow(() -> new RecordNotFoundException("Room not found"));
         booking.setRoom(room);
 
-        Payment payment = paymentMapper.mapToEntity(requestBookingDTO.getRequestPaymentDTO());
-        payment.setBooking(booking);
-        booking.setPayment(payment);
+        Payment payment = paymentMapper.mapToEntity(requestBookingDTO);
+        double totalPrice = calculateTotalPrice(room, booking.getCheckInDate(), booking.getCheckOutDate());
+        payment.setTotalPrice(totalPrice);
+
+
+        if (isForAnother) {
+            payment.setBooking(booking);
+            booking.setPayment(payment);
+        }else {
+            throw new RecordNotFoundException("Payment not found");
+        }
 
         Booking bookingSaved = bookingRepository.save(booking);
         return bookingMapper.mapToDto(bookingSaved);
+    }
+
+    public double calculateTotalPrice(Rooms room, LocalDate checkInDate, LocalDate checkOutDate) {
+        double totalPrice = 0.0;
+
+        LocalDate currentDate = checkInDate;
+        while (!currentDate.isAfter(checkOutDate)) {
+            DayOfWeek dayOfWeek = currentDate.getDayOfWeek();
+            Optional<RoomPricing> optionalRoomPricing = roomPricingRepository.findByRoomAndDayOfWeek(room, dayOfWeek);
+            if (optionalRoomPricing.isPresent()) {
+                totalPrice += optionalRoomPricing.get().getPrice();
+            } else {
+                throw new RuntimeException("No pricing found for day: " + dayOfWeek);
+            }
+            currentDate = currentDate.plusDays(1);
+        }
+
+        return totalPrice;
     }
 
     @Override

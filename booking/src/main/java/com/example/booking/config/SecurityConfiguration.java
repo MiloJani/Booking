@@ -51,7 +51,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(auth -> auth
 
                         .requestMatchers(GET,"/api/booking/findAll","/api/booking/findById/"
-                                ,"/api/userInfo/findById/").hasAuthority("USER")
+                                ,"/api/userInfo/findById/","api/roomPricing/rooms/{roomId}/pricings").hasAuthority("USER")
                         .requestMatchers(GET,"/api/businesses/admin").hasAuthority("ADMIN")
                         .requestMatchers(GET,"/api/users/findAll","/api/businesses/findAll","/api/businesses/findById/"
                                 , "/api/rooms/findAll","/api/rooms/findById/"

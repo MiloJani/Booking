@@ -56,7 +56,16 @@ public class BusinessController {
     }
 
     @PostMapping("/search")
-    public ResponseEntity<Page<ResponseSearchDTO>> searchBookings(@Valid @RequestBody RequestSearchDTO searchRequest) {
+    public ResponseEntity<?/*Page<ResponseSearchDTO>*/> searchBookings(@Valid @RequestBody RequestSearchDTO searchRequest,
+                                                                  BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            List<String> errors = bindingResult.getAllErrors().stream()
+                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                    .collect(Collectors.toList());
+            return ResponseEntity.badRequest().body(errors);
+        }
+
+
         Page<ResponseSearchDTO> searchResults = businessService.search(searchRequest);
         return ResponseEntity.ok(searchResults);
     }

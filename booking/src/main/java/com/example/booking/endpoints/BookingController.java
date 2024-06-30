@@ -6,6 +6,8 @@ import com.example.booking.dataproviders.dto.businessDTOs.RequestBusinessDTO;
 import com.example.booking.dataproviders.dto.businessDTOs.ResponseBusinessDTO;
 import com.example.booking.dataproviders.dto.searchDTOs.RequestSearchDTO;
 import com.example.booking.dataproviders.dto.searchDTOs.ResponseSearchDTO;
+import com.example.booking.dataproviders.entities.Booking;
+import com.example.booking.dataproviders.entities.User;
 import com.example.booking.dataproviders.services.BookingService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -13,6 +15,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -36,9 +40,20 @@ public class BookingController {
         return ResponseEntity.ok(bookingService.findBookingById(id));
     }
 
+    @GetMapping("/history")
+    public List<Booking> getBookingHistory() {
+
+        SecurityContext context = SecurityContextHolder.getContext();
+        String username = context.getAuthentication().getName();
+        return bookingService.getBookingHistory(username);
+    }
+
     @PostMapping("/save")
     public ResponseEntity<ResponseBookingDTO> saveBooking(@Valid @RequestBody RequestBookingDTO requestBookingDTO) {
-        return new ResponseEntity<>(bookingService.saveBooking(requestBookingDTO), HttpStatus.CREATED);
+
+        SecurityContext context = SecurityContextHolder.getContext();
+        String username = context.getAuthentication().getName();
+        return new ResponseEntity<>(bookingService.saveBooking(requestBookingDTO,username), HttpStatus.CREATED);
     }
 
 
