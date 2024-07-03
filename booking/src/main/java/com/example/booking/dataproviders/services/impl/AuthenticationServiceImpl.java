@@ -9,10 +9,8 @@ import com.example.booking.dataproviders.dto.userDTOs.RequestAdminDTO;
 import com.example.booking.dataproviders.dto.userDTOs.RequestUserDTO;
 import com.example.booking.dataproviders.dto.userDTOs.ResponseAdminDTO;
 import com.example.booking.dataproviders.dto.userDTOs.ResponseUserDTO;
-import com.example.booking.dataproviders.entities.Role;
 import com.example.booking.dataproviders.entities.User;
 import com.example.booking.dataproviders.repositories.BookingRepository;
-import com.example.booking.dataproviders.repositories.RoleRepository;
 import com.example.booking.dataproviders.repositories.UserRepository;
 import com.example.booking.dataproviders.services.AuthenticationService;
 import com.example.booking.dataproviders.services.UserService;
@@ -23,13 +21,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -38,10 +32,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final UserRepository userRepository;
     private final UserService userService;
     private final BookingRepository bookingRepository;
-    private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
-    private final RoleRepository roleRepository;
     private final UserDetailsService userDetailsService;
 
     @Override
@@ -109,13 +101,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         jwtService.invalidateToken(token);
         //        SecurityContextHolder.clearContext();
         ResponseLogoutDTO responseLogoutDTO = new ResponseLogoutDTO();
-        responseLogoutDTO.setMessage("Logout succesfull");
+        responseLogoutDTO.setMessage("Logout successful");
         return responseLogoutDTO;
     }
 
-//    @Override
-//    public void logout(String token) {
-//        String invalidatedToken = jwtService.invalidateToken(token);
-//        SecurityContextHolder.clearContext();
-//    }
 }

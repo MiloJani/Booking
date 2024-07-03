@@ -1,7 +1,6 @@
 package com.example.booking.config;
 
-import com.example.booking.core.exceptions.TokenInvalidException;
-import com.example.booking.dataproviders.entities.User;
+
 import com.example.booking.dataproviders.services.impl.JwtService;
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.RequiredArgsConstructor;

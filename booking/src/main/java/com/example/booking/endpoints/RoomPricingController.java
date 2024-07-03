@@ -1,7 +1,5 @@
 package com.example.booking.endpoints;
 
-import com.example.booking.dataproviders.dto.roomDTOs.RequestRoomDTO;
-import com.example.booking.dataproviders.dto.roomDTOs.ResponseRoomDTO;
 import com.example.booking.dataproviders.dto.roomPricingDTOs.RequestRoomPricingDTO;
 import com.example.booking.dataproviders.dto.roomPricingDTOs.ResponseRoomPricingDTO;
 import com.example.booking.dataproviders.dto.roomPricingDTOs.ResponseRoomsPricingDTO;

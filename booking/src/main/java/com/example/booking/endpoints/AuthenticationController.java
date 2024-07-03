@@ -4,6 +4,7 @@ import com.example.booking.dataproviders.dto.authDTOs.AuthenticationRequest;
 import com.example.booking.dataproviders.dto.authDTOs.AuthenticationResponse;
 import com.example.booking.dataproviders.dto.authDTOs.LogoutDTO;
 import com.example.booking.dataproviders.dto.authDTOs.ResponseLogoutDTO;
+import com.example.booking.dataproviders.dto.searchDTOs.RequestSearchDTO;
 import com.example.booking.dataproviders.dto.userDTOs.RequestAdminDTO;
 import com.example.booking.dataproviders.dto.userDTOs.RequestUserDTO;
 import com.example.booking.dataproviders.dto.userDTOs.ResponseAdminDTO;
@@ -13,9 +14,11 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,12 +37,10 @@ public class AuthenticationController {
     @PostMapping("/authenticate")
     public ResponseEntity<?/*AuthenticationResponse*/> authenticate(
             @Valid @RequestBody AuthenticationRequest request, BindingResult bindingResult
-            ){
+            ) throws MethodArgumentNotValidException, NoSuchMethodException {
         if (bindingResult.hasErrors()) {
-            List<String> errors = bindingResult.getAllErrors().stream()
-                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
-                    .collect(Collectors.toList());
-            return ResponseEntity.badRequest().body(errors);
+            MethodParameter methodParameter = new MethodParameter(this.getClass().getMethod("authenticate", AuthenticationRequest.class, BindingResult.class), 0);
+            throw new MethodArgumentNotValidException(methodParameter, bindingResult);
         }
         return ResponseEntity.ok(authenticationService.authenticate(request));
     }

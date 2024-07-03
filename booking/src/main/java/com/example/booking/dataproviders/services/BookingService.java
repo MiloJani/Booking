@@ -1,7 +1,9 @@
 package com.example.booking.dataproviders.services;
 
 import com.example.booking.dataproviders.dto.bookingDTOs.RequestBookingDTO;
+import com.example.booking.dataproviders.dto.bookingDTOs.RequestBookingHistoryDto;
 import com.example.booking.dataproviders.dto.bookingDTOs.ResponseBookingDTO;
+import com.example.booking.dataproviders.dto.bookingDTOs.ResponseBookingHistoryDTO;
 import com.example.booking.dataproviders.dto.searchDTOs.RequestSearchDTO;
 import com.example.booking.dataproviders.dto.searchDTOs.ResponseSearchDTO;
 import com.example.booking.dataproviders.entities.Booking;
@@ -16,7 +18,7 @@ public interface BookingService {
 
     ResponseBookingDTO findBookingById(Long id);
 
-    List<Booking> getBookingHistory(String username);
+    Page<ResponseBookingHistoryDTO> getBookingHistory(String username, RequestBookingHistoryDto requestDto);
 
     ResponseBookingDTO saveBooking(RequestBookingDTO requestBookingDTO,String username);
 

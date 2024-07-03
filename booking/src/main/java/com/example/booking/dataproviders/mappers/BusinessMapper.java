@@ -1,6 +1,5 @@
 package com.example.booking.dataproviders.mappers;
 
-import com.example.booking.config.NetworkUtils;
 import com.example.booking.dataproviders.dto.businessDTOs.RequestBusinessDTO;
 import com.example.booking.dataproviders.dto.businessDTOs.ResponseBusinessDTO;
 import com.example.booking.dataproviders.dto.businessDTOs.ResponseBusinessSearchDTO;
@@ -10,18 +9,11 @@ import com.example.booking.dataproviders.entities.Businesses;
 import com.example.booking.dataproviders.entities.Rooms;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.io.File;
-import java.io.FileInputStream;
+
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Base64;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -31,7 +23,7 @@ import java.util.Set;
 public class BusinessMapper {
 
     private RoomMapper roomMapper;
-    private static final String UPLOAD_DIR = "C:\\Users\\USER\\Desktop\\BookingProject\\Booking\\booking\\src\\main\\resources\\images\\businesses\\";
+    private static final String UPLOAD_DIR = "C:\\Users\\USER\\Desktop\\SavedPhotos\\Businesses\\";
 
 
     public ResponseBusinessDTO mapToDto(Businesses businesses) {

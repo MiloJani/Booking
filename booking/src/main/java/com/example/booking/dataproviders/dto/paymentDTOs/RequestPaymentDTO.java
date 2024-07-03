@@ -1,10 +1,7 @@
 package com.example.booking.dataproviders.dto.paymentDTOs;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,7 +10,8 @@ import lombok.Setter;
 public class RequestPaymentDTO {
 
     @NotBlank(message = "Card number is required")
-//    @Schema(description = "Card number used for the payment", example = "1234-5678-9012-3456")
+    @Pattern(regexp = "AL\\d{2} [0-9A-Z]{4} [0-9A-Z]{4} [0-9A-Z]{4} [0-9A-Z]{4} [0-9A-Z]{4} [0-9A-Z]{4}", message = "Card number must be a valid Albanian IBAN")
+    @Schema(description = "Card number used for the payment", example = "AL47 2121 1009 0000 0002 3569 8741")
     private String cardNumber;
 
     @NotBlank(message = "Card holder name is required")
@@ -30,6 +28,7 @@ public class RequestPaymentDTO {
     private int expirationMonth;
 
     @PositiveOrZero(message = "CVV must be a positive number or zero")
+//    @Pattern(regexp = "\\d{3}", message = "CVV must be exactly 3 digits")
 //    @Schema(description = "CVV number of the card", example = "123")
     private int cvv;
 }

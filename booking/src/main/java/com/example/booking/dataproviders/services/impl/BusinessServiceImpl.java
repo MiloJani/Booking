@@ -103,7 +103,7 @@ public class BusinessServiceImpl implements BusinessService {
         }
 
         int page = searchRequest.getPage();
-        int size = 2;
+        int size = 10;
         Pageable pageable = PageRequest.of(page, size);
         Page<Businesses> businessesPage = businessRepository.findAll(pageable);
 

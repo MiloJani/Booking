@@ -9,12 +9,14 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.core.MethodParameter;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -57,14 +59,11 @@ public class BusinessController {
 
     @PostMapping("/search")
     public ResponseEntity<?/*Page<ResponseSearchDTO>*/> searchBookings(@Valid @RequestBody RequestSearchDTO searchRequest,
-                                                                  BindingResult bindingResult) {
+                                                                  BindingResult bindingResult) throws MethodArgumentNotValidException, NoSuchMethodException {
         if (bindingResult.hasErrors()) {
-            List<String> errors = bindingResult.getAllErrors().stream()
-                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
-                    .collect(Collectors.toList());
-            return ResponseEntity.badRequest().body(errors);
+            MethodParameter methodParameter = new MethodParameter(this.getClass().getMethod("searchBookings", RequestSearchDTO.class, BindingResult.class), 0);
+            throw new MethodArgumentNotValidException(methodParameter, bindingResult);
         }
-
 
         Page<ResponseSearchDTO> searchResults = businessService.search(searchRequest);
         return ResponseEntity.ok(searchResults);
@@ -73,13 +72,11 @@ public class BusinessController {
     @PostMapping("/save")
     public ResponseEntity<?/*ResponseBusinessDTO*/> saveBusiness(@Valid @ModelAttribute RequestBusinessDTO requestBusinessDTO,
                                                             BindingResult bindingResult
-            /*@Valid @RequestBody RequestBusinessDTO requestBusinessDTO*/) {
+            /*@Valid @RequestBody RequestBusinessDTO requestBusinessDTO*/) throws MethodArgumentNotValidException, NoSuchMethodException {
 
         if (bindingResult.hasErrors()) {
-            List<String> errors = bindingResult.getAllErrors().stream()
-                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
-                    .collect(Collectors.toList());
-            return ResponseEntity.badRequest().body(errors);
+            MethodParameter methodParameter = new MethodParameter(this.getClass().getMethod("saveBusiness", RequestBusinessDTO.class, BindingResult.class), 0);
+            throw new MethodArgumentNotValidException(methodParameter, bindingResult);
         }
 
 

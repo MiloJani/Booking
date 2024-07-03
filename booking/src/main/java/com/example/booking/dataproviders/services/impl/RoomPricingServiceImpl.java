@@ -13,7 +13,6 @@ import com.example.booking.dataproviders.repositories.RoomPricingRepository;
 import com.example.booking.dataproviders.repositories.RoomRepository;
 import com.example.booking.dataproviders.repositories.UserRepository;
 import com.example.booking.dataproviders.services.RoomPricingService;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

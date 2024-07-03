@@ -5,16 +5,19 @@ import com.example.booking.dataproviders.dto.businessDTOs.ResponseBusinessDTO;
 import com.example.booking.dataproviders.dto.roomDTOs.RequestAvailableRoomsDTO;
 import com.example.booking.dataproviders.dto.roomDTOs.RequestRoomDTO;
 import com.example.booking.dataproviders.dto.roomDTOs.ResponseRoomDTO;
+import com.example.booking.dataproviders.dto.searchDTOs.RequestSearchDTO;
 import com.example.booking.dataproviders.services.RoomService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -41,13 +44,11 @@ public class RoomController {
 
     @PostMapping("/getAvailableRooms")
     public ResponseEntity<?> getAvailableRooms(@Valid @RequestBody RequestAvailableRoomsDTO requestAvailableRoomsDTO,
-                                               BindingResult bindingResult) {
+                                               BindingResult bindingResult) throws MethodArgumentNotValidException, NoSuchMethodException {
 
         if (bindingResult.hasErrors()) {
-            List<String> errors = bindingResult.getAllErrors().stream()
-                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
-                    .collect(Collectors.toList());
-            return ResponseEntity.badRequest().body(errors);
+            MethodParameter methodParameter = new MethodParameter(this.getClass().getMethod("getAvailableRooms", RequestAvailableRoomsDTO.class, BindingResult.class), 0);
+            throw new MethodArgumentNotValidException(methodParameter, bindingResult);
         }
 
         SecurityContext context = SecurityContextHolder.getContext();
@@ -58,13 +59,11 @@ public class RoomController {
 
     @PostMapping("/save")
     public ResponseEntity<?/*ResponseRoomDTO*/> saveRoom(@Valid @ModelAttribute RequestRoomDTO requestRoomDTO/*@Valid @RequestBody RequestRoomDTO requestRoomDTO*/
-    , BindingResult bindingResult) {
+    , BindingResult bindingResult) throws MethodArgumentNotValidException, NoSuchMethodException {
 
         if (bindingResult.hasErrors()) {
-            List<String> errors = bindingResult.getAllErrors().stream()
-                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
-                    .collect(Collectors.toList());
-            return ResponseEntity.badRequest().body(errors);
+            MethodParameter methodParameter = new MethodParameter(this.getClass().getMethod("saveRoom", RequestRoomDTO.class, BindingResult.class), 0);
+            throw new MethodArgumentNotValidException(methodParameter, bindingResult);
         }
 
         SecurityContext context = SecurityContextHolder.getContext();

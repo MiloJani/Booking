@@ -3,20 +3,13 @@ package com.example.booking.dataproviders.mappers;
 import com.example.booking.core.exceptions.NotCorrectDataException;
 import com.example.booking.dataproviders.dto.bookingDTOs.RequestBookingDTO;
 import com.example.booking.dataproviders.dto.bookingDTOs.ResponseBookingDTO;
-import com.example.booking.dataproviders.dto.businessDTOs.RequestBusinessDTO;
-import com.example.booking.dataproviders.dto.businessDTOs.ResponseBusinessDTO;
-import com.example.booking.dataproviders.dto.roomDTOs.ResponseRoomDTO;
+import com.example.booking.dataproviders.dto.bookingDTOs.ResponseBookingHistoryDTO;
 import com.example.booking.dataproviders.entities.Booking;
-import com.example.booking.dataproviders.entities.Businesses;
-import com.example.booking.dataproviders.entities.Rooms;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 
 @AllArgsConstructor
 @Component
@@ -65,4 +58,16 @@ public class BookingMapper {
 
             return booking;
         }
+
+    public ResponseBookingHistoryDTO mapToHistoryDto(Booking booking) {
+        ResponseBookingHistoryDTO dto = new ResponseBookingHistoryDTO();
+        dto.setHotelName(booking.getRoom().getBusinesses().getBusinessName());
+        dto.setRoomName(booking.getRoom().getRoomName());
+        dto.setTotalPrice(booking.getPayment().getTotalPrice());
+        dto.setBookingDate(booking.getBookingDate());
+        dto.setCheckInDate(booking.getCheckInDate());
+        dto.setCheckOutDate(booking.getCheckOutDate());
+        dto.setStatus(booking.getStatus());
+        return dto;
+    }
 }

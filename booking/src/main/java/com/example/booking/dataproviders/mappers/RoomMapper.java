@@ -1,6 +1,5 @@
 package com.example.booking.dataproviders.mappers;
 
-import com.example.booking.config.NetworkUtils;
 import com.example.booking.dataproviders.dto.roomDTOs.RequestRoomDTO;
 import com.example.booking.dataproviders.dto.roomDTOs.ResponseRoomDTO;
 import com.example.booking.dataproviders.entities.Rooms;
@@ -9,7 +8,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.*;
-import java.util.Enumeration;
 
 @Component
 @AllArgsConstructor
