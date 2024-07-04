@@ -22,4 +22,8 @@ public class ResponseRoomDTO {
     private String image;
 
     private Long businessId;
+
+    private Double totalPriceForNights;
+
+    private Long numberOfNights;
 }

@@ -1,5 +1,6 @@
 package com.example.booking.dataproviders.services.impl;
 
+import com.example.booking.constants.Constants;
 import com.example.booking.core.exceptions.AuthenticationFailedException;
 import com.example.booking.core.exceptions.RecordNotFoundException;
 import com.example.booking.dataproviders.dto.roomPricingDTOs.RequestRoomPricingDTO;
@@ -48,10 +49,10 @@ public class RoomPricingServiceImpl implements RoomPricingService {
     public List<ResponseRoomsPricingDTO> getWeekRoomPricings(Long roomId,String username) {
 
         User user = userRepository.findUserByUsername(username)
-                .orElseThrow(() -> new RecordNotFoundException("User not found"));
+                .orElseThrow(() -> new RecordNotFoundException(Constants.USER_NOT_FOUND));
 
         if (!user.getRole().getRoleName().equals("USER")) {
-            throw new AuthenticationFailedException("User does not have sufficient privileges to add a business");
+            throw new AuthenticationFailedException(Constants.INSUFFICIENT_PRIVILEGES);
         }
 
         List<RoomPricing> roomPricings = roomPricingRepository.findByRoom_RoomId(roomId);
@@ -64,7 +65,7 @@ public class RoomPricingServiceImpl implements RoomPricingService {
                     RoomPricing pricing = roomPricings.stream()
                             .filter(p -> p.getDayOfWeek() == date.getDayOfWeek())
                             .findFirst()
-                            .orElseThrow(() -> new RuntimeException("Room pricing not found for " + date.getDayOfWeek()));
+                            .orElseThrow(() -> new RecordNotFoundException(Constants.ROOM_PRICING_NOT_FOUND + date.getDayOfWeek()));
                     return new ResponseRoomsPricingDTO(date.format(formatter), pricing.getPrice());
                 })
                 .collect(Collectors.toList());
@@ -74,7 +75,7 @@ public class RoomPricingServiceImpl implements RoomPricingService {
     @Override
     public ResponseRoomPricingDTO findRoomPricingById(Long id) {
 
-        RoomPricing roomPricing = roomPricingRepository.findById(id).orElseThrow(() -> new RuntimeException("Room pricing not found"));
+        RoomPricing roomPricing = roomPricingRepository.findById(id).orElseThrow(() -> new RecordNotFoundException(Constants.ROOM_PRICING_NOT_FOUND));
 
         return roomPricingMapper.mapToDto(roomPricing);
     }
@@ -85,7 +86,7 @@ public class RoomPricingServiceImpl implements RoomPricingService {
     public ResponseRoomPricingDTO saveRoomPricing(RequestRoomPricingDTO requestRoomPricingDTO) {
 
         RoomPricing roomPricing = roomPricingMapper.mapToEntity(requestRoomPricingDTO);
-        Rooms room = roomRepository.findById(requestRoomPricingDTO.getRoomId()).orElseThrow(() -> new RuntimeException("Room not found"));
+        Rooms room = roomRepository.findById(requestRoomPricingDTO.getRoomId()).orElseThrow(() -> new RecordNotFoundException(Constants.ROOM_NOT_FOUND));
         roomPricing.setRoom(room);
         RoomPricing savedRoomPricing = roomPricingRepository.save(roomPricing);
         return roomPricingMapper.mapToDto(savedRoomPricing);
@@ -105,7 +106,7 @@ public class RoomPricingServiceImpl implements RoomPricingService {
     @Override
     public void deleteRoomPricing(Long id) {
 
-        RoomPricing roomPricing = roomPricingRepository.findById(id).orElseThrow(() -> new RuntimeException("Room pricing not found"));
+        RoomPricing roomPricing = roomPricingRepository.findById(id).orElseThrow(() -> new RecordNotFoundException(Constants.ROOM_PRICING_NOT_FOUND));
 
         roomPricingRepository.delete(roomPricing);
     }

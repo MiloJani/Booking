@@ -50,7 +50,7 @@ public class RoomMapper {
             String fileUrl = "http://" + serverIp + ":8080/SavedPhotos/Rooms/" + imageFileName;
             return fileUrl;
         }else {
-            return "http://" + serverIp + ":8080/SavedPhotos/Rooms/default.png";
+            return "http://" + serverIp + ":8080/SavedPhotos/Rooms/default.jpeg";
         }
 
 

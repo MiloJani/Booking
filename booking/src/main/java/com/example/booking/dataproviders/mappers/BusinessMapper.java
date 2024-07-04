@@ -132,10 +132,12 @@ public class BusinessMapper {
     public String getBusinessImageUrl(String imageFileName) {
         String serverIp = getPublicIpAddress(); // dynamic ip
 
+//        String serverIp="https://d9b0-79-106-203-119.ngrok-free.app";
         if (imageFileName != null) {
             return "http://" + serverIp + ":8080/SavedPhotos/Businesses/" + imageFileName;
+//            return /*"http://" +*/ serverIp + "/SavedPhotos/Businesses/" + imageFileName;
         } else {
-            return "http://" + serverIp + ":8080/SavedPhotos/Businesses/default.png";
+            return "http://" + serverIp + ":8080/SavedPhotos/Businesses/default.jpg";
         }
     }
 }

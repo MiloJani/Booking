@@ -1,5 +1,6 @@
 package com.example.booking.dataproviders.services.impl;
 
+import com.example.booking.constants.Constants;
 import com.example.booking.core.exceptions.AuthenticationFailedException;
 import com.example.booking.core.exceptions.NotCorrectDataException;
 import com.example.booking.core.exceptions.RecordAlreadyExistsException;
@@ -24,7 +25,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -57,7 +57,8 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public ResponseBookingDTO findBookingById(Long id) {
 
-        Booking booking = bookingRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("Booking not found"));
+        Booking booking = bookingRepository.findById(id).orElseThrow(
+                () -> new RecordNotFoundException(Constants.BOOKING_NOT_FOUND));
 
         return bookingMapper.mapToDto(booking);
     }
@@ -65,7 +66,8 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public Page<ResponseBookingHistoryDTO> getBookingHistory(String username, RequestBookingHistoryDto requestDto) {
-        User user = userRepository.findUserByUsername(username).orElseThrow(() -> new RecordNotFoundException("User not found"));
+        User user = userRepository.findUserByUsername(username).orElseThrow(
+                () -> new RecordNotFoundException(Constants.USER_NOT_FOUND));
         Pageable pageable = PageRequest.of(requestDto.getPage(), requestDto.getSize());
         Page<Booking> bookings = bookingRepository.findByUser(user, pageable);
 
@@ -78,10 +80,10 @@ public class BookingServiceImpl implements BookingService {
     public ResponseBookingDTO saveBooking(RequestBookingDTO requestBookingDTO,String username) {
 
         User user = userRepository.findUserByUsername(username)
-                .orElseThrow(() -> new RecordNotFoundException("User not found"));
+                .orElseThrow(() -> new RecordNotFoundException(Constants.USER_NOT_FOUND));
 
         if (!user.getRole().getRoleName().equals("USER")) {
-            throw new AuthenticationFailedException("User does not have sufficient privileges to view available rooms");
+            throw new AuthenticationFailedException(Constants.INSUFFICIENT_PRIVILEGES);
         }
 
         Booking booking = bookingMapper.mapToEntity(requestBookingDTO);
@@ -95,7 +97,7 @@ public class BookingServiceImpl implements BookingService {
         );
 
         if (!overlappingBookings.isEmpty()) {
-            throw new RecordAlreadyExistsException("A booking already exists for the given date range");
+            throw new RecordAlreadyExistsException(Constants.BOOKING_ALREADY_EXISTS);
         }
 
         if (booking.getBookingDate().isEqual(booking.getCheckInDate()) ||
@@ -115,7 +117,8 @@ public class BookingServiceImpl implements BookingService {
         user.getUserInfo().setDiscountPoints(points);
         userInfoRepository.save(user.getUserInfo());
 
-        Rooms room = roomRepository.findById(requestBookingDTO.getRoomId()).orElseThrow(() -> new RecordNotFoundException("Room not found"));
+        Rooms room = roomRepository.findById(requestBookingDTO.getRoomId()).orElseThrow(
+                () -> new RecordNotFoundException(Constants.ROOM_NOT_FOUND));
         booking.setRoom(room);
 
         Payment payment = paymentMapper.mapToEntity(requestBookingDTO);
@@ -124,7 +127,7 @@ public class BookingServiceImpl implements BookingService {
 
 
         if (!isForAnother && !booking.getFullName().equals(payment.getCardHolderName())) {
-            throw new NotCorrectDataException("Card holder name is different from user name");
+            throw new NotCorrectDataException(Constants.DIFFERENT_USER_CARD_NAME);
         }
 
         payment.setBooking(booking);
@@ -144,7 +147,7 @@ public class BookingServiceImpl implements BookingService {
             if (optionalRoomPricing.isPresent()) {
                 totalPrice += optionalRoomPricing.get().getPrice();
             } else {
-                throw new RecordNotFoundException("No pricing found for day: " + dayOfWeek);
+                throw new RecordNotFoundException(Constants.ROOM_PRICING_NOT_FOUND + dayOfWeek);
             }
             currentDate = currentDate.plusDays(1);
         }
@@ -160,7 +163,8 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public void deleteBooking(Long id) {
 
-        Booking booking = bookingRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("Booking not found"));
+        Booking booking = bookingRepository.findById(id).orElseThrow(
+                () -> new RecordNotFoundException(Constants.BOOKING_NOT_FOUND));
         bookingRepository.delete(booking);
 
     }

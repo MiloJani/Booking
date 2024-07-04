@@ -1,5 +1,6 @@
 package com.example.booking.dataproviders.services.impl;
 
+import com.example.booking.constants.Constants;
 import com.example.booking.core.exceptions.AuthenticationFailedException;
 import com.example.booking.core.exceptions.RecordNotFoundException;
 import com.example.booking.dataproviders.dto.authDTOs.AuthenticationRequest;
@@ -49,20 +50,21 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             UserDetails userDetails = userDetailsService.loadUserByUsername(request.getEmail());
 
             if (userDetails == null) {
-                throw new RecordNotFoundException("User not found");
+                throw new RecordNotFoundException(Constants.USER_NOT_FOUND);
             }
 
             var jwtToken = jwtService.generateToken(userDetails);
             String roleName = userDetails.getAuthorities().stream()
                     .map(authority -> authority.getAuthority())
                     .findFirst()
-                    .orElseThrow(() -> new AuthenticationFailedException("User has no roles assigned"));
+                    .orElseThrow(() -> new AuthenticationFailedException(Constants.INSUFFICIENT_PRIVILEGES));
 
 
 
             if (Objects.equals(roleName, "USER")){
 
-            User user = userRepository.findUserByUsername(userDetails.getUsername()).orElseThrow(() -> new RuntimeException("User not found"));
+            User user = userRepository.findUserByUsername(userDetails.getUsername()).orElseThrow(
+                    () -> new RecordNotFoundException(Constants.USER_NOT_FOUND));
             AuthenticationResponse authenticationResponse = new AuthenticationResponse();
             authenticationResponse.setToken(jwtToken);
             authenticationResponse.setFullName(user.getUserInfo().getFullName());
@@ -79,10 +81,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 return authenticationResponse;
             }
             else {
-                throw new AuthenticationFailedException("User has no roles assigned");
+                throw new AuthenticationFailedException(Constants.INSUFFICIENT_PRIVILEGES);
             }
         } catch (Exception e) {
-            throw new AuthenticationFailedException("User could not login");
+            throw new AuthenticationFailedException(Constants.UNABLE_TO_LOGIN);
         }
     }
 
@@ -101,7 +103,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         jwtService.invalidateToken(token);
         //        SecurityContextHolder.clearContext();
         ResponseLogoutDTO responseLogoutDTO = new ResponseLogoutDTO();
-        responseLogoutDTO.setMessage("Logout successful");
+        responseLogoutDTO.setMessage(Constants.LOGOUT);
         return responseLogoutDTO;
     }
 

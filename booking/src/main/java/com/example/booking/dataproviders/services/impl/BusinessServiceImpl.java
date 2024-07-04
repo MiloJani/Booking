@@ -1,5 +1,6 @@
 package com.example.booking.dataproviders.services.impl;
 
+import com.example.booking.constants.Constants;
 import com.example.booking.core.exceptions.*;
 import com.example.booking.dataproviders.dto.businessDTOs.RequestBusinessDTO;
 import com.example.booking.dataproviders.dto.businessDTOs.ResponseBusinessDTO;
@@ -57,10 +58,10 @@ public class BusinessServiceImpl implements BusinessService {
     public List<String> findAllBusinessesOfAdmin(String username) {
 
         User admin = userRepository.findUserByUsername(username)
-                .orElseThrow(() -> new RecordNotFoundException("User not found"));
+                .orElseThrow(() -> new RecordNotFoundException(Constants.USER_NOT_FOUND));
 
         if (!admin.getRole().getRoleName().equals("ADMIN")) {
-            throw new AuthenticationFailedException("User does not have sufficient privileges to add a business");
+            throw new AuthenticationFailedException(Constants.INSUFFICIENT_PRIVILEGES);
         }
 
         List<Businesses> businesses = businessRepository.findByAdmin(admin);
@@ -74,7 +75,8 @@ public class BusinessServiceImpl implements BusinessService {
     @Override
     public ResponseBusinessDTO findBusinessById(Long id) {
 
-        Businesses business = businessRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("Business not found"));
+        Businesses business = businessRepository.findById(id).orElseThrow(
+                () -> new RecordNotFoundException(Constants.BUSINESS_NOT_FOUND));
 
         return businessMapper.mapToDto(business);
     }
@@ -83,7 +85,7 @@ public class BusinessServiceImpl implements BusinessService {
     public Page<ResponseSearchDTO> search(RequestSearchDTO searchRequest) {
 
         if (searchRequest.getCheckInDate()==null || searchRequest.getCheckOutDate()==null){
-            throw new NotCorrectDataException("Check in date and check out date should both be filled");
+            throw new NotCorrectDataException(Constants.CHECKED_IN_OUT_DATES_NOT_FILLED);
         }
         LocalDate checkInDate;
         LocalDate checkOutDate;
@@ -92,14 +94,14 @@ public class BusinessServiceImpl implements BusinessService {
             checkInDate = LocalDate.parse(searchRequest.getCheckInDate(), formatter);
             checkOutDate = LocalDate.parse(searchRequest.getCheckOutDate(), formatter);
         } catch (Exception e) {
-            throw new NotCorrectDataException("Invalid date format. Please provide dates in yyyy-MM-dd format.");
+            throw new NotCorrectDataException(Constants.INVALID_DATE_FORMAT);
         }
 
         if (checkInDate.isBefore(LocalDate.now()) || checkOutDate.isBefore(LocalDate.now())){
-            throw new NotCorrectDataException("Check in date and check out date should both be today or after");
+            throw new NotCorrectDataException(Constants.INCORRECT_CHECKED_IN_OUT_DATES);
 
         }else if (checkOutDate.isBefore(checkInDate)){
-            throw new NotCorrectDataException("Check out date should be the same or after check in date");
+            throw new NotCorrectDataException(Constants.INCORRECT_CHECKED_IN_OUT_DATES);
         }
 
         int page = searchRequest.getPage();
@@ -121,7 +123,7 @@ public class BusinessServiceImpl implements BusinessService {
         return businessesPage.map(business -> {
             int capacity = calculateCapacity(searchRequest.getNoOfAdults(), searchRequest.getNoOfChildren());
             if (capacity>5){
-                throw new NotCorrectDataException("Maximum capacity exceeded");
+                throw new NotCorrectDataException(Constants.MAXIMUM_CAPACITY);
             }
             List<Long> availableRoomIds = roomRepository.findAvailableRoomIds(
                     business.getBusinessId(),
@@ -233,15 +235,15 @@ public class BusinessServiceImpl implements BusinessService {
         Optional<Businesses> doesBusinessExist = businessRepository.findByBusinessName(requestBusinessDTO.getName());
 
         if (doesBusinessExist.isPresent()) {
-            throw new RecordAlreadyExistsException("Business with the same name already exists");
+            throw new RecordAlreadyExistsException(Constants.BUSINESS_ALREADY_EXISTS);
         }
         Businesses businesses = businessMapper.mapToEntity(requestBusinessDTO);
 
         User user = userRepository.findUserByUsername(username)
-                .orElseThrow(() -> new RecordNotFoundException("User not found"));
+                .orElseThrow(() -> new RecordNotFoundException(Constants.USER_NOT_FOUND));
 
         if (!user.getRole().getRoleName().equals("ADMIN")) {
-            throw new AuthenticationFailedException("User does not have sufficient privileges to add a business");
+            throw new AuthenticationFailedException(Constants.INSUFFICIENT_PRIVILEGES);
         }
 
         businesses.setAdmin(user);
@@ -249,7 +251,7 @@ public class BusinessServiceImpl implements BusinessService {
         MultipartFile image = requestBusinessDTO.getImage();
         if (image != null && !image.isEmpty()) {
             if (image.getSize() > 100 * 1024) {
-                throw new FileCouldNotBeSavedException("File size must be less than or equal to 100KB");
+                throw new FileCouldNotBeSavedException(Constants.FILE_TOO_LARGE);
             }
             try {
 
@@ -263,7 +265,7 @@ public class BusinessServiceImpl implements BusinessService {
 
                 businesses.setImage(fileName);
             } catch (IOException e) {
-                throw new FileCouldNotBeSavedException("Failed to save image file");
+                throw new FileCouldNotBeSavedException(Constants.FILE_SAVE_FAILED);
             }
         }
 
