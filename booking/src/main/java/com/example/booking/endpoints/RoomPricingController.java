@@ -1,8 +1,6 @@
 package com.example.booking.endpoints;
 
-import com.example.booking.dataproviders.dto.roomPricingDTOs.RequestRoomPricingDTO;
-import com.example.booking.dataproviders.dto.roomPricingDTOs.ResponseRoomPricingDTO;
-import com.example.booking.dataproviders.dto.roomPricingDTOs.ResponseRoomsPricingDTO;
+import com.example.booking.dataproviders.dto.roomPricingDTOs.*;
 import com.example.booking.dataproviders.services.RoomPricingService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -34,12 +32,14 @@ public class RoomPricingController {
         return ResponseEntity.ok(roomPricingService.findRoomPricingById(id));
     }
 
-    @GetMapping("/rooms/{roomId}/pricings")
-    public List<ResponseRoomsPricingDTO> getRoomPricings(@PathVariable Long roomId) {
+//    @GetMapping("/rooms/{roomId}/pricings")
+    @PostMapping("/room/pricings")
+    public ResponseEntity<WeekRoomPricingResponseDTO> getRoomPricings(@Valid @RequestBody RequestRoomPricingsDTO requestRoomPricingsDTO) {
 
         SecurityContext context = SecurityContextHolder.getContext();
         String username = context.getAuthentication().getName();
-        return roomPricingService.getWeekRoomPricings(roomId,username);
+        WeekRoomPricingResponseDTO dto = roomPricingService.getWeekRoomPricings(requestRoomPricingsDTO,username);
+        return ResponseEntity.ok(dto);
     }
 
     @PostMapping("/save")

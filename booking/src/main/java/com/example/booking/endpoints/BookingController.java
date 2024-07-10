@@ -43,12 +43,19 @@ public class BookingController {
         return ResponseEntity.ok(bookingService.findBookingById(id));
     }
 
-    @PostMapping("/history")
-    public Page<ResponseBookingHistoryDTO> getBookingHistory(@RequestBody RequestBookingHistoryDto requestDto) {
+    @GetMapping("/history")
+    public ResponseEntity<List<ResponseBookingHistoryDTO>> getBookingHistory() {
         SecurityContext context = SecurityContextHolder.getContext();
         String username = context.getAuthentication().getName();
-        return bookingService.getBookingHistory(username, requestDto);
+        return ResponseEntity.ok(bookingService.getBookingHistory(username));
     }
+
+//    @PostMapping("/history")
+//    public Page<ResponseBookingHistoryDTO> getBookingHistory(@RequestBody RequestBookingHistoryDto requestDto) {
+//        SecurityContext context = SecurityContextHolder.getContext();
+//        String username = context.getAuthentication().getName();
+//        return bookingService.getBookingHistory(username, requestDto);
+//    }
 
     @PostMapping("/save")
     public ResponseEntity<?/*ResponseBookingDTO*/> saveBooking(@Valid @RequestBody RequestBookingDTO requestBookingDTO

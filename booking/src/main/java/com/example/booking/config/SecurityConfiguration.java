@@ -59,7 +59,7 @@ public class SecurityConfiguration {
 
                         .requestMatchers(POST,"/api/auth/**").permitAll()
                         .requestMatchers(POST,"/api/booking/save","/api/businesses/search"
-                                ,"/api/rooms/getAvailableRooms").hasAuthority("USER")
+                                ,"/api/rooms/getAvailableRooms","/api/roomPricing/room/pricings").hasAuthority("USER")
                         .requestMatchers(POST,"/api/businesses/save"
                                 ,"/api/rooms/save","/api/roomPricing/save").hasAuthority("ADMIN")
 

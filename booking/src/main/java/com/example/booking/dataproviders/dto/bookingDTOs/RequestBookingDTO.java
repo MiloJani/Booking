@@ -55,7 +55,7 @@ public class RequestBookingDTO extends RequestPaymentDTO {
     private Long roomId;
 
     @NotBlank(message = "This field is required")
-    private String isForAnother;
+    private String isForAnother="true";
 
 
 }

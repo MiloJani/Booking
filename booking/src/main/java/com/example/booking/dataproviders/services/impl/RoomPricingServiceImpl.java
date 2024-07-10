@@ -3,9 +3,7 @@ package com.example.booking.dataproviders.services.impl;
 import com.example.booking.constants.Constants;
 import com.example.booking.core.exceptions.AuthenticationFailedException;
 import com.example.booking.core.exceptions.RecordNotFoundException;
-import com.example.booking.dataproviders.dto.roomPricingDTOs.RequestRoomPricingDTO;
-import com.example.booking.dataproviders.dto.roomPricingDTOs.ResponseRoomPricingDTO;
-import com.example.booking.dataproviders.dto.roomPricingDTOs.ResponseRoomsPricingDTO;
+import com.example.booking.dataproviders.dto.roomPricingDTOs.*;
 import com.example.booking.dataproviders.entities.RoomPricing;
 import com.example.booking.dataproviders.entities.Rooms;
 import com.example.booking.dataproviders.entities.User;
@@ -14,6 +12,8 @@ import com.example.booking.dataproviders.repositories.RoomPricingRepository;
 import com.example.booking.dataproviders.repositories.RoomRepository;
 import com.example.booking.dataproviders.repositories.UserRepository;
 import com.example.booking.dataproviders.services.RoomPricingService;
+import com.example.booking.dataproviders.services.utilities.ValidationUtilities;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -46,7 +46,8 @@ public class RoomPricingServiceImpl implements RoomPricingService {
     }
 
     @Override
-    public List<ResponseRoomsPricingDTO> getWeekRoomPricings(Long roomId,String username) {
+    @Transactional
+    public WeekRoomPricingResponseDTO getWeekRoomPricings(RequestRoomPricingsDTO roomPricingsDTO, String username) {
 
         User user = userRepository.findUserByUsername(username)
                 .orElseThrow(() -> new RecordNotFoundException(Constants.USER_NOT_FOUND));
@@ -55,20 +56,50 @@ public class RoomPricingServiceImpl implements RoomPricingService {
             throw new AuthenticationFailedException(Constants.INSUFFICIENT_PRIVILEGES);
         }
 
-        List<RoomPricing> roomPricings = roomPricingRepository.findByRoom_RoomId(roomId);
+        int discountPoints = user.getUserInfo().getDiscountPoints();
+        double discount = discountPoints >= 10 ? discountPoints * 2 : 0;
 
-        LocalDate today = LocalDate.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM");
+        Rooms room = roomRepository.findById(roomPricingsDTO.getRoomId())
+                .orElseThrow(() -> new RecordNotFoundException(Constants.ROOM_NOT_FOUND));
 
-        return today.datesUntil(today.plusDays(7))
+        List<RoomPricing> roomPricings = roomPricingRepository.findByRoom_RoomId(roomPricingsDTO.getRoomId());
+
+
+        ValidationUtilities.validateDates(roomPricingsDTO.getCheckInDate()
+                ,roomPricingsDTO.getCheckOutDate());
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate checkInDate = LocalDate.parse(roomPricingsDTO.getCheckInDate(), formatter);
+        LocalDate checkOutDate = LocalDate.parse(roomPricingsDTO.getCheckOutDate(), formatter);
+
+        List<ResponseRoomsPricingDTO> responsePricings = checkInDate.datesUntil(checkOutDate.plusDays(1))
                 .map(date -> {
+                    DayOfWeek dayOfWeek = date.getDayOfWeek();
                     RoomPricing pricing = roomPricings.stream()
-                            .filter(p -> p.getDayOfWeek() == date.getDayOfWeek())
+                            .filter(p -> p.getDayOfWeek() == dayOfWeek)
                             .findFirst()
-                            .orElseThrow(() -> new RecordNotFoundException(Constants.ROOM_PRICING_NOT_FOUND + date.getDayOfWeek()));
+                            .orElseThrow(() -> new RecordNotFoundException(Constants.ROOM_PRICING_NOT_FOUND + dayOfWeek));
                     return new ResponseRoomsPricingDTO(date.format(formatter), pricing.getPrice());
                 })
                 .collect(Collectors.toList());
+
+//        LocalDate today = LocalDate.now();
+//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM");
+//
+//        List<ResponseRoomsPricingDTO> responsePricings = today.datesUntil(today.plusDays(7))
+//                .map(date -> {
+//                    RoomPricing pricing = roomPricings.stream()
+//                            .filter(p -> p.getDayOfWeek() == date.getDayOfWeek())
+//                            .findFirst()
+//                            .orElseThrow(() -> new RecordNotFoundException(Constants.ROOM_PRICING_NOT_FOUND + date.getDayOfWeek()));
+//                    return new ResponseRoomsPricingDTO(date.format(formatter), pricing.getPrice());
+//                })
+//                .collect(Collectors.toList());
+
+        return new WeekRoomPricingResponseDTO(
+                responsePricings, room.getBusinesses().getTax(), discount,room.getDescription(),
+                room.getBusinesses().isFreeParking(),room.getBusinesses().isFreeWifi(),
+                room.getBusinesses().isInsidePool(),room.getBusinesses().isFreeBreakfast());
     }
 
 
@@ -136,6 +167,7 @@ public class RoomPricingServiceImpl implements RoomPricingService {
             adjustedPrice = basePrice;
         }
         return adjustedPrice;
+//        return Math.max(adjustedPrice, 0);
     }
 
 }

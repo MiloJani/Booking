@@ -60,32 +60,31 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                     .orElseThrow(() -> new AuthenticationFailedException(Constants.INSUFFICIENT_PRIVILEGES));
 
 
+            return generateAuthenticationResponse(userDetails, jwtToken, roleName);
 
-            if (Objects.equals(roleName, "USER")){
-
-            User user = userRepository.findUserByUsername(userDetails.getUsername()).orElseThrow(
-                    () -> new RecordNotFoundException(Constants.USER_NOT_FOUND));
-            AuthenticationResponse authenticationResponse = new AuthenticationResponse();
-            authenticationResponse.setToken(jwtToken);
-            authenticationResponse.setFullName(user.getUserInfo().getFullName());
-            authenticationResponse.setPoints(user.getUserInfo().getDiscountPoints());
-            authenticationResponse.setBooks(bookingRepository.countByUser(user));
-            authenticationResponse.setRoleName(roleName);
-            return authenticationResponse;
-            }
-            else if (Objects.equals(roleName, "ADMIN")){
-                AuthenticationResponse authenticationResponse = new AuthenticationResponse();
-                authenticationResponse.setToken(jwtToken);
-                authenticationResponse.setFullName("ADMIN");
-                authenticationResponse.setRoleName(roleName);
-                return authenticationResponse;
-            }
-            else {
-                throw new AuthenticationFailedException(Constants.INSUFFICIENT_PRIVILEGES);
-            }
         } catch (Exception e) {
             throw new AuthenticationFailedException(Constants.UNABLE_TO_LOGIN);
         }
+    }
+
+    private AuthenticationResponse generateAuthenticationResponse(UserDetails userDetails, String jwtToken, String roleName) {
+        AuthenticationResponse response = new AuthenticationResponse();
+        response.setToken(jwtToken);
+        response.setRoleName(roleName);
+
+        if (Objects.equals(roleName, "USER")) {
+            User user = userRepository.findUserByUsername(userDetails.getUsername())
+                    .orElseThrow(() -> new RecordNotFoundException(Constants.USER_NOT_FOUND));
+            response.setFullName(user.getUserInfo().getFullName());
+            response.setPoints(user.getUserInfo().getDiscountPoints());
+            response.setBooks(bookingRepository.countByUser(user));
+        } else if (Objects.equals(roleName, "ADMIN")) {
+            response.setFullName("ADMIN");
+        } else {
+            throw new AuthenticationFailedException(Constants.INSUFFICIENT_PRIVILEGES);
+        }
+
+        return response;
     }
 
     @Override

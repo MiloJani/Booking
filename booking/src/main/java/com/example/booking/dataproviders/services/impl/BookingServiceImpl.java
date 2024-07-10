@@ -1,18 +1,15 @@
 package com.example.booking.dataproviders.services.impl;
 
 import com.example.booking.constants.Constants;
-import com.example.booking.core.exceptions.AuthenticationFailedException;
 import com.example.booking.core.exceptions.NotCorrectDataException;
 import com.example.booking.core.exceptions.RecordAlreadyExistsException;
 import com.example.booking.core.exceptions.RecordNotFoundException;
-import com.example.booking.dataproviders.dto.bookingDTOs.RequestBookingDTO;
-import com.example.booking.dataproviders.dto.bookingDTOs.RequestBookingHistoryDto;
-import com.example.booking.dataproviders.dto.bookingDTOs.ResponseBookingDTO;
-import com.example.booking.dataproviders.dto.bookingDTOs.ResponseBookingHistoryDTO;
+import com.example.booking.dataproviders.dto.bookingDTOs.*;
 import com.example.booking.dataproviders.entities.*;
 import com.example.booking.dataproviders.mappers.*;
 import com.example.booking.dataproviders.repositories.*;
 import com.example.booking.dataproviders.services.BookingService;
+import com.example.booking.dataproviders.services.utilities.UtilitiesService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -20,11 +17,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.time.DayOfWeek;
+
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -35,13 +33,9 @@ public class BookingServiceImpl implements BookingService {
     private PaymentRepository paymentRepository;
     private PaymentMapper paymentMapper;
     private UserRepository userRepository;
-    private UserMapper userMapper;
     private UserInfoRepository userInfoRepository;
     private RoomRepository roomRepository;
-    private RoomPricingRepository roomPricingRepository;
-    private BusinessRepository businessRepository;
-    private BusinessMapper businessMapper;
-    private RoomMapper roomMapper;
+    private UtilitiesService utilitiesService;
 
     @Override
     public List<ResponseBookingDTO> findAllBookings() {
@@ -65,26 +59,42 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public Page<ResponseBookingHistoryDTO> getBookingHistory(String username, RequestBookingHistoryDto requestDto) {
+    public List<ResponseBookingHistoryDTO> getBookingHistory(String username) {
         User user = userRepository.findUserByUsername(username).orElseThrow(
                 () -> new RecordNotFoundException(Constants.USER_NOT_FOUND));
-        Pageable pageable = PageRequest.of(requestDto.getPage(), requestDto.getSize());
-        Page<Booking> bookings = bookingRepository.findByUser(user, pageable);
+        List<Booking> bookings = bookingRepository.findByUser(user);
 
-        return bookings.map(bookingMapper::mapToHistoryDto);
+        return bookings.stream()
+                .map(bookingMapper::mapToHistoryDto)
+                .collect(Collectors.toList());
     }
+
+//    @Override
+//    @Transactional
+//    public Page<ResponseBookingHistoryDTO> getBookingHistory(String username, RequestBookingHistoryDto requestDto) {
+//        User user = userRepository.findUserByUsername(username).orElseThrow(
+//                () -> new RecordNotFoundException(Constants.USER_NOT_FOUND));
+//        Pageable pageable = PageRequest.of(requestDto.getPage(), requestDto.getSize());
+//        Page<Booking> bookings = bookingRepository.findByUser(user, pageable);
+//
+//        return bookings.map(bookingMapper::mapToHistoryDto);
+//    }
 
 
     @Override
     @Transactional
-    public ResponseBookingDTO saveBooking(RequestBookingDTO requestBookingDTO,String username) {
+    public /*ResponseBookingDTO*/BookingResponseDTO saveBooking(RequestBookingDTO requestBookingDTO,String username) {
 
-        User user = userRepository.findUserByUsername(username)
-                .orElseThrow(() -> new RecordNotFoundException(Constants.USER_NOT_FOUND));
 
-        if (!user.getRole().getRoleName().equals("USER")) {
-            throw new AuthenticationFailedException(Constants.INSUFFICIENT_PRIVILEGES);
-        }
+
+//        User user = userRepository.findUserByUsername(username)
+//                .orElseThrow(() -> new RecordNotFoundException(Constants.USER_NOT_FOUND));
+//
+//        if (!user.getRole().getRoleName().equals("USER")) {
+//            throw new AuthenticationFailedException(Constants.INSUFFICIENT_PRIVILEGES);
+//        }
+
+        User user = utilitiesService.validateUser(username,"USER");
 
         Booking booking = bookingMapper.mapToEntity(requestBookingDTO);
 
@@ -100,16 +110,18 @@ public class BookingServiceImpl implements BookingService {
             throw new RecordAlreadyExistsException(Constants.BOOKING_ALREADY_EXISTS);
         }
 
-        if (booking.getBookingDate().isEqual(booking.getCheckInDate()) ||
-                booking.getBookingDate().isEqual(booking.getCheckOutDate()) ||
-                (booking.getBookingDate().isAfter(booking.getCheckInDate()) &&
-                        booking.getBookingDate().isBefore(booking.getCheckOutDate()))){
-            booking.setStatus("Checked In");
-        }else if (booking.getBookingDate().isBefore(booking.getCheckInDate())){
-            booking.setStatus("Booked");
-        }else {
-            booking.setStatus("Checked Out");
-        }
+//        if (booking.getBookingDate().isEqual(booking.getCheckInDate()) ||
+//                booking.getBookingDate().isEqual(booking.getCheckOutDate()) ||
+//                (booking.getBookingDate().isAfter(booking.getCheckInDate()) &&
+//                        booking.getBookingDate().isBefore(booking.getCheckOutDate()))){
+//            booking.setStatus("Checked In");
+//        }else if (booking.getBookingDate().isBefore(booking.getCheckInDate())){
+//            booking.setStatus("Booked");
+//        }else {
+//            booking.setStatus("Checked Out");
+//        }
+
+        utilitiesService.setStatus(booking);
         
         booking.setUser(user);
 
@@ -122,7 +134,7 @@ public class BookingServiceImpl implements BookingService {
         booking.setRoom(room);
 
         Payment payment = paymentMapper.mapToEntity(requestBookingDTO);
-        double totalPrice = calculateTotalPrice(room, booking.getCheckInDate(), booking.getCheckOutDate());
+        double totalPrice = utilitiesService.calculateTotalPrice(room, booking.getCheckInDate(), booking.getCheckOutDate());
         payment.setTotalPrice(totalPrice);
 
 
@@ -134,25 +146,14 @@ public class BookingServiceImpl implements BookingService {
         booking.setPayment(payment);
 
         Booking bookingSaved = bookingRepository.save(booking);
-        return bookingMapper.mapToDto(bookingSaved);
-    }
 
-    public double calculateTotalPrice(Rooms room, LocalDate checkInDate, LocalDate checkOutDate) {
-        double totalPrice = 0.0;
+        BookingResponseDTO bookingResponseDTO = new BookingResponseDTO();
+        bookingResponseDTO.setPoints(user.getUserInfo().getDiscountPoints());
+        bookingResponseDTO.setBooks(bookingRepository.countByUser(user));
 
-        LocalDate currentDate = checkInDate;
-        while (!currentDate.isAfter(checkOutDate)) {
-            DayOfWeek dayOfWeek = currentDate.getDayOfWeek();
-            Optional<RoomPricing> optionalRoomPricing = roomPricingRepository.findByRoomAndDayOfWeek(room, dayOfWeek);
-            if (optionalRoomPricing.isPresent()) {
-                totalPrice += optionalRoomPricing.get().getPrice();
-            } else {
-                throw new RecordNotFoundException(Constants.ROOM_PRICING_NOT_FOUND + dayOfWeek);
-            }
-            currentDate = currentDate.plusDays(1);
-        }
+//        return bookingMapper.mapToDto(bookingSaved);
 
-        return totalPrice;
+        return bookingResponseDTO;
     }
 
     @Override

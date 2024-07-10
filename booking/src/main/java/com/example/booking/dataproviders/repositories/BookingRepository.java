@@ -18,7 +18,9 @@ public interface BookingRepository extends JpaRepository<Booking, Long>, JpaSpec
 
     int countByUser(User user);
 
-    Page<Booking> findByUser(User user, Pageable pageable);
+//    Page<Booking> findByUser(User user, Pageable pageable);
+
+    List<Booking> findByUser(User user);
 
     @Query("SELECT b FROM Booking b WHERE b.room.roomId = :roomId AND " +
             "(b.checkInDate <= :checkOutDate AND b.checkOutDate >= :checkInDate)")

@@ -1,8 +1,6 @@
 package com.example.booking.dataproviders.services;
 
-import com.example.booking.dataproviders.dto.roomPricingDTOs.RequestRoomPricingDTO;
-import com.example.booking.dataproviders.dto.roomPricingDTOs.ResponseRoomPricingDTO;
-import com.example.booking.dataproviders.dto.roomPricingDTOs.ResponseRoomsPricingDTO;
+import com.example.booking.dataproviders.dto.roomPricingDTOs.*;
 
 import java.util.List;
 
@@ -10,7 +8,7 @@ public interface RoomPricingService {
 
     List<ResponseRoomPricingDTO> findAllRoomPricings();
 
-    List<ResponseRoomsPricingDTO> getWeekRoomPricings(Long roomId,String username);
+    WeekRoomPricingResponseDTO getWeekRoomPricings(RequestRoomPricingsDTO dto, String username);
 
     ResponseRoomPricingDTO findRoomPricingById(Long id);
 

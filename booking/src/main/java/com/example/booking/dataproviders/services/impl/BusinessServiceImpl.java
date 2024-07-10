@@ -13,6 +13,8 @@ import com.example.booking.dataproviders.repositories.BusinessRepository;
 import com.example.booking.dataproviders.repositories.RoomRepository;
 import com.example.booking.dataproviders.repositories.UserRepository;
 import com.example.booking.dataproviders.services.BusinessService;
+import com.example.booking.dataproviders.services.utilities.UtilitiesService;
+import com.example.booking.dataproviders.services.utilities.ValidationUtilities;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -39,6 +41,7 @@ public class BusinessServiceImpl implements BusinessService {
     private BusinessMapper businessMapper;
     private UserRepository userRepository;
     private RoomRepository roomRepository;
+    private UtilitiesService utilitiesService;
 
     @Override
     public List<ResponseBusinessDTO> findAllBusinesses() {
@@ -57,12 +60,14 @@ public class BusinessServiceImpl implements BusinessService {
     @Override
     public List<String> findAllBusinessesOfAdmin(String username) {
 
-        User admin = userRepository.findUserByUsername(username)
-                .orElseThrow(() -> new RecordNotFoundException(Constants.USER_NOT_FOUND));
+//        User admin = userRepository.findUserByUsername(username)
+//                .orElseThrow(() -> new RecordNotFoundException(Constants.USER_NOT_FOUND));
+//
+//        if (!admin.getRole().getRoleName().equals("ADMIN")) {
+//            throw new AuthenticationFailedException(Constants.INSUFFICIENT_PRIVILEGES);
+//        }
 
-        if (!admin.getRole().getRoleName().equals("ADMIN")) {
-            throw new AuthenticationFailedException(Constants.INSUFFICIENT_PRIVILEGES);
-        }
+        User admin = utilitiesService.validateUser(username,"ADMIN");
 
         List<Businesses> businesses = businessRepository.findByAdmin(admin);
 
@@ -84,28 +89,34 @@ public class BusinessServiceImpl implements BusinessService {
     @Override
     public Page<ResponseSearchDTO> search(RequestSearchDTO searchRequest) {
 
-        if (searchRequest.getCheckInDate()==null || searchRequest.getCheckOutDate()==null){
-            throw new NotCorrectDataException(Constants.CHECKED_IN_OUT_DATES_NOT_FILLED);
-        }
-        LocalDate checkInDate;
-        LocalDate checkOutDate;
+
+        ValidationUtilities.validateDates(searchRequest.getCheckInDate(), searchRequest.getCheckOutDate());
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        try {
-            checkInDate = LocalDate.parse(searchRequest.getCheckInDate(), formatter);
-            checkOutDate = LocalDate.parse(searchRequest.getCheckOutDate(), formatter);
-        } catch (Exception e) {
-            throw new NotCorrectDataException(Constants.INVALID_DATE_FORMAT);
-        }
+        LocalDate checkInDate = LocalDate.parse(searchRequest.getCheckInDate(), formatter);
+        LocalDate checkOutDate = LocalDate.parse(searchRequest.getCheckOutDate(), formatter);
 
-        if (checkInDate.isBefore(LocalDate.now()) || checkOutDate.isBefore(LocalDate.now())){
-            throw new NotCorrectDataException(Constants.INCORRECT_CHECKED_IN_OUT_DATES);
-
-        }else if (checkOutDate.isBefore(checkInDate)){
-            throw new NotCorrectDataException(Constants.INCORRECT_CHECKED_IN_OUT_DATES);
-        }
+//        if (searchRequest.getCheckInDate()==null || searchRequest.getCheckOutDate()==null){
+//            throw new NotCorrectDataException(Constants.CHECKED_IN_OUT_DATES_NOT_FILLED);
+//        }
+//        LocalDate checkInDate;
+//        LocalDate checkOutDate;
+//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+//        try {
+//            checkInDate = LocalDate.parse(searchRequest.getCheckInDate(), formatter);
+//            checkOutDate = LocalDate.parse(searchRequest.getCheckOutDate(), formatter);
+//        } catch (Exception e) {
+//            throw new NotCorrectDataException(Constants.INVALID_DATE_FORMAT);
+//        }
+//
+//        if (checkInDate.isBefore(LocalDate.now()) || checkOutDate.isBefore(LocalDate.now())){
+//            throw new NotCorrectDataException(Constants.INCORRECT_CHECKED_IN_OUT_DATES);
+//
+//        }else if (checkOutDate.isBefore(checkInDate)){
+//            throw new NotCorrectDataException(Constants.INCORRECT_CHECKED_IN_OUT_DATES);
+//        }
 
         int page = searchRequest.getPage();
-        int size = 10;
+        int size = 10; //constants?
         Pageable pageable = PageRequest.of(page, size);
         Page<Businesses> businessesPage = businessRepository.findAll(pageable);
 
@@ -122,7 +133,7 @@ public class BusinessServiceImpl implements BusinessService {
 
         return businessesPage.map(business -> {
             int capacity = calculateCapacity(searchRequest.getNoOfAdults(), searchRequest.getNoOfChildren());
-            if (capacity>5){
+            if (capacity>5){ //constants?
                 throw new NotCorrectDataException(Constants.MAXIMUM_CAPACITY);
             }
             List<Long> availableRoomIds = roomRepository.findAvailableRoomIds(
@@ -248,26 +259,30 @@ public class BusinessServiceImpl implements BusinessService {
 
         businesses.setAdmin(user);
 
-        MultipartFile image = requestBusinessDTO.getImage();
-        if (image != null && !image.isEmpty()) {
-            if (image.getSize() > 100 * 1024) {
-                throw new FileCouldNotBeSavedException(Constants.FILE_TOO_LARGE);
-            }
-            try {
+        String uploadDir = "C:\\Users\\USER\\Desktop\\SavedPhotos\\Businesses\\";
+        String fileName = ValidationUtilities.transferImage(requestBusinessDTO.getImage(),uploadDir);
+        businesses.setImage(fileName);
 
-                String uploadDir = "C:\\Users\\USER\\Desktop\\SavedPhotos\\Businesses\\";
-
-                String fileName = System.currentTimeMillis() + "_" + image.getOriginalFilename();
-
-                File file = new File(uploadDir + fileName);
-
-                image.transferTo(file);
-
-                businesses.setImage(fileName);
-            } catch (IOException e) {
-                throw new FileCouldNotBeSavedException(Constants.FILE_SAVE_FAILED);
-            }
-        }
+//        MultipartFile image = requestBusinessDTO.getImage();
+//        if (image != null && !image.isEmpty()) {
+//            if (image.getSize() > 100 * 1024) {
+//                throw new FileCouldNotBeSavedException(Constants.FILE_TOO_LARGE);
+//            }
+//            try {
+//
+//                String uploadDir = "C:\\Users\\USER\\Desktop\\SavedPhotos\\Businesses\\";
+//
+//                String fileName = System.currentTimeMillis() + "_" + image.getOriginalFilename();
+//
+//                File file = new File(uploadDir + fileName);
+//
+//                image.transferTo(file);
+//
+//                businesses.setImage(fileName);
+//            } catch (IOException e) {
+//                throw new FileCouldNotBeSavedException(Constants.FILE_SAVE_FAILED);
+//            }
+//        }
 
         businesses.setTax(0.07);
         Businesses savedBusiness = businessRepository.save(businesses);

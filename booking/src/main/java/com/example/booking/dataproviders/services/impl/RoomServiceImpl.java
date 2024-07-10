@@ -15,6 +15,8 @@ import com.example.booking.dataproviders.repositories.RoomPricingRepository;
 import com.example.booking.dataproviders.repositories.RoomRepository;
 import com.example.booking.dataproviders.repositories.UserRepository;
 import com.example.booking.dataproviders.services.RoomService;
+import com.example.booking.dataproviders.services.utilities.UtilitiesService;
+import com.example.booking.dataproviders.services.utilities.ValidationUtilities;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -42,6 +44,7 @@ public class RoomServiceImpl implements RoomService {
     private RoomMapper roomMapper;
     private final RoomPricingServiceImpl roomPricingServiceImpl;
     private final RoomPricingRepository roomPricingRepository;
+    private UtilitiesService utilitiesService;
 
 
     @Override
@@ -93,15 +96,22 @@ public class RoomServiceImpl implements RoomService {
             throw new AuthenticationFailedException(Constants.INSUFFICIENT_PRIVILEGES);
         }
 
-        LocalDate checkInDate;
-        LocalDate checkOutDate;
+        ValidationUtilities.validateDates(requestAvailableRoomsDTO.getCheckInDate()
+                ,requestAvailableRoomsDTO.getCheckOutDate());
+
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        try {
-            checkInDate = LocalDate.parse(requestAvailableRoomsDTO.getCheckInDate(), formatter);
-            checkOutDate = LocalDate.parse(requestAvailableRoomsDTO.getCheckOutDate(), formatter);
-        } catch (Exception e) {
-            throw new NotCorrectDataException(Constants.INVALID_DATE_FORMAT);
-        }
+        LocalDate checkInDate = LocalDate.parse(requestAvailableRoomsDTO.getCheckInDate(), formatter);
+        LocalDate checkOutDate = LocalDate.parse(requestAvailableRoomsDTO.getCheckOutDate(), formatter);
+
+//        LocalDate checkInDate;
+//        LocalDate checkOutDate;
+//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+//        try {
+//            checkInDate = LocalDate.parse(requestAvailableRoomsDTO.getCheckInDate(), formatter);
+//            checkOutDate = LocalDate.parse(requestAvailableRoomsDTO.getCheckOutDate(), formatter);
+//        } catch (Exception e) {
+//            throw new NotCorrectDataException(Constants.INVALID_DATE_FORMAT);
+//        }
 
         int size = 10;
         Sort sort = Sort.by(Sort.Direction.ASC, "price"); // Default sort by price ascending
@@ -131,7 +141,7 @@ public class RoomServiceImpl implements RoomService {
 
         return rooms.map(room -> {
             ResponseRoomDTO responseRoomDTO = roomMapper.mapToDto(room);
-            double totalPriceForNights = calculateTotalPrice(room, checkInDate, checkOutDate);
+            double totalPriceForNights = utilitiesService.calculateTotalPrice(room, checkInDate, checkOutDate);
             long numberOfNights = ChronoUnit.DAYS.between(checkInDate, checkOutDate);
             responseRoomDTO.setTotalPriceForNights(totalPriceForNights);
             responseRoomDTO.setNumberOfNights(numberOfNights);
@@ -139,23 +149,23 @@ public class RoomServiceImpl implements RoomService {
         });
     }
 
-    public double calculateTotalPrice(Rooms room, LocalDate checkInDate, LocalDate checkOutDate) {
-        double totalPrice = 0.0;
-
-        LocalDate currentDate = checkInDate;
-        while (!currentDate.isAfter(checkOutDate)) {
-            DayOfWeek dayOfWeek = currentDate.getDayOfWeek();
-            Optional<RoomPricing> optionalRoomPricing = roomPricingRepository.findByRoomAndDayOfWeek(room, dayOfWeek);
-            if (optionalRoomPricing.isPresent()) {
-                totalPrice += optionalRoomPricing.get().getPrice();
-            } else {
-                throw new RecordNotFoundException(Constants.ROOM_PRICING_NOT_FOUND + dayOfWeek);
-            }
-            currentDate = currentDate.plusDays(1);
-        }
-
-        return totalPrice;
-    }
+//    public double calculateTotalPrice(Rooms room, LocalDate checkInDate, LocalDate checkOutDate) {
+//        double totalPrice = 0.0;
+//
+//        LocalDate currentDate = checkInDate;
+//        while (!currentDate.isAfter(checkOutDate)) {
+//            DayOfWeek dayOfWeek = currentDate.getDayOfWeek();
+//            Optional<RoomPricing> optionalRoomPricing = roomPricingRepository.findByRoomAndDayOfWeek(room, dayOfWeek);
+//            if (optionalRoomPricing.isPresent()) {
+//                totalPrice += optionalRoomPricing.get().getPrice();
+//            } else {
+//                throw new RecordNotFoundException(Constants.ROOM_PRICING_NOT_FOUND + dayOfWeek);
+//            }
+//            currentDate = currentDate.plusDays(1);
+//        }
+//
+//        return totalPrice;
+//    }
 
 
 
@@ -186,26 +196,30 @@ public class RoomServiceImpl implements RoomService {
             throw new AuthenticationFailedException(Constants.INSUFFICIENT_PRIVILEGES);
         }
 
-        MultipartFile image = roomDTO.getImage();
-        if (image != null && !image.isEmpty()) {
-            if (image.getSize() > 100 * 1024) {
-                throw new FileCouldNotBeSavedException(Constants.FILE_TOO_LARGE);
-            }
-            try {
+        String uploadDir = "C:\\Users\\USER\\Desktop\\SavedPhotos\\Rooms\\";
+        String fileName = ValidationUtilities.transferImage(roomDTO.getImage(),uploadDir);
+        rooms.setImage(fileName);
 
-                String uploadDir = "C:\\Users\\USER\\Desktop\\SavedPhotos\\Rooms\\";
-
-                String fileName = System.currentTimeMillis() + "_" + image.getOriginalFilename();
-
-                File file = new File(uploadDir + fileName);
-
-                image.transferTo(file);
-
-                rooms.setImage(fileName);
-            } catch (IOException e) {
-                throw new FileCouldNotBeSavedException(Constants.FILE_SAVE_FAILED);
-            }
-        }
+//        MultipartFile image = roomDTO.getImage();
+//        if (image != null && !image.isEmpty()) {
+//            if (image.getSize() > 100 * 1024) {
+//                throw new FileCouldNotBeSavedException(Constants.FILE_TOO_LARGE);
+//            }
+//            try {
+//
+//                String uploadDir = "C:\\Users\\USER\\Desktop\\SavedPhotos\\Rooms\\";
+//
+//                String fileName = System.currentTimeMillis() + "_" + image.getOriginalFilename();
+//
+//                File file = new File(uploadDir + fileName);
+//
+//                image.transferTo(file);
+//
+//                rooms.setImage(fileName);
+//            } catch (IOException e) {
+//                throw new FileCouldNotBeSavedException(Constants.FILE_SAVE_FAILED);
+//            }
+//        }
 
         rooms.setBusinesses(businesses);
 

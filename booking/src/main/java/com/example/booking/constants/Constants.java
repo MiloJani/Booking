@@ -26,6 +26,8 @@ public class Constants {
     // File related constants
     public static final String FILE_TOO_LARGE = "File size must be less than or equal to 100KB";
     public static final String FILE_SAVE_FAILED = "Failed to save image file";
+    public static final String NO_IMAGE_PROVIDED = "No image provided";
+
 
     // Data related constants
     public static final String INVALID_DATA = "Invalid data";
