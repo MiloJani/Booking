@@ -17,7 +17,7 @@ public interface BusinessService {
 
         ResponseBusinessDTO findBusinessById(Long id);
 
-        Page<ResponseSearchDTO> search(RequestSearchDTO searchRequest);
+        Page<ResponseSearchDTO> search(RequestSearchDTO searchRequest,String username);
 
         /*ResponseBusinessDTO*/String saveBusiness(RequestBusinessDTO requestBusinessDTO,String email);
 

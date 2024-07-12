@@ -67,7 +67,7 @@ public class BusinessServiceImpl implements BusinessService {
 //            throw new AuthenticationFailedException(Constants.INSUFFICIENT_PRIVILEGES);
 //        }
 
-        User admin = utilitiesService.validateUser(username,"ADMIN");
+        User admin = utilitiesService.validateUser(username,Constants.ADMIN);
 
         List<Businesses> businesses = businessRepository.findByAdmin(admin);
 
@@ -87,8 +87,9 @@ public class BusinessServiceImpl implements BusinessService {
     }
 
     @Override
-    public Page<ResponseSearchDTO> search(RequestSearchDTO searchRequest) {
+    public Page<ResponseSearchDTO> search(RequestSearchDTO searchRequest,String username) {
 
+        User user = utilitiesService.validateUser(username,Constants.USER);
 
         ValidationUtilities.validateDates(searchRequest.getCheckInDate(), searchRequest.getCheckOutDate());
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -133,7 +134,7 @@ public class BusinessServiceImpl implements BusinessService {
 
         return businessesPage.map(business -> {
             int capacity = calculateCapacity(searchRequest.getNoOfAdults(), searchRequest.getNoOfChildren());
-            if (capacity>5){ //constants?
+            if (capacity>5){ //constants(5)?
                 throw new NotCorrectDataException(Constants.MAXIMUM_CAPACITY);
             }
             List<Long> availableRoomIds = roomRepository.findAvailableRoomIds(
@@ -250,12 +251,14 @@ public class BusinessServiceImpl implements BusinessService {
         }
         Businesses businesses = businessMapper.mapToEntity(requestBusinessDTO);
 
-        User user = userRepository.findUserByUsername(username)
-                .orElseThrow(() -> new RecordNotFoundException(Constants.USER_NOT_FOUND));
+//        User user = userRepository.findUserByUsername(username)
+//                .orElseThrow(() -> new RecordNotFoundException(Constants.USER_NOT_FOUND));
+//
+//        if (!user.getRole().getRoleName().equals("ADMIN")) {
+//            throw new AuthenticationFailedException(Constants.INSUFFICIENT_PRIVILEGES);
+//        }
 
-        if (!user.getRole().getRoleName().equals("ADMIN")) {
-            throw new AuthenticationFailedException(Constants.INSUFFICIENT_PRIVILEGES);
-        }
+        User user = utilitiesService.validateUser(username,Constants.ADMIN);
 
         businesses.setAdmin(user);
 
@@ -284,7 +287,7 @@ public class BusinessServiceImpl implements BusinessService {
 //            }
 //        }
 
-        businesses.setTax(0.07);
+        businesses.setTax(0.07); //default
         Businesses savedBusiness = businessRepository.save(businesses);
 
 //        return businessMapper.mapToDto(savedBusiness);

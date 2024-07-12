@@ -1,5 +1,6 @@
 package com.example.booking.dataproviders.mappers;
 
+import com.example.booking.constants.Constants;
 import com.example.booking.dataproviders.dto.businessDTOs.RequestBusinessDTO;
 import com.example.booking.dataproviders.dto.businessDTOs.ResponseBusinessDTO;
 import com.example.booking.dataproviders.dto.businessDTOs.ResponseBusinessSearchDTO;
@@ -7,6 +8,7 @@ import com.example.booking.dataproviders.dto.roomDTOs.ResponseRoomDTO;
 import com.example.booking.dataproviders.dto.searchDTOs.ResponseSearchDTO;
 import com.example.booking.dataproviders.entities.Businesses;
 import com.example.booking.dataproviders.entities.Rooms;
+import com.example.booking.dataproviders.services.utilities.ValidationUtilities;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -88,7 +90,7 @@ public class BusinessMapper {
 //        }
 
         String imageFileName = businesses.getImage();
-        responseBusinessSearchDTO.setImage(getBusinessImageUrl(imageFileName));
+        responseBusinessSearchDTO.setImage(ValidationUtilities.getRoomImageUrl(imageFileName, Constants.BUSINESS));
 
         ResponseSearchDTO responseSearchDTO = new ResponseSearchDTO();
         responseSearchDTO.setResponseBusinessSearchDTO(responseBusinessSearchDTO);
@@ -119,25 +121,5 @@ public class BusinessMapper {
 //        }
 //    }
 
-    public static String getPublicIpAddress() {
-        try (final DatagramSocket datagramSocket = new DatagramSocket()) {
-            datagramSocket.connect(InetAddress.getByName("8.8.8.8"), 12345);
-            return datagramSocket.getLocalAddress().getHostAddress();
-        } catch (IOException e) {
-            e.printStackTrace(); // Handle exception as needed
-            return "Failed to retrieve public IP";
-        }
-    }
 
-    public String getBusinessImageUrl(String imageFileName) {
-        String serverIp = getPublicIpAddress(); // dynamic ip
-
-//        String serverIp="https://d9b0-79-106-203-119.ngrok-free.app";
-        if (imageFileName != null) {
-            return "http://" + serverIp + ":8080/SavedPhotos/Businesses/" + imageFileName;
-//            return /*"http://" +*/ serverIp + "/SavedPhotos/Businesses/" + imageFileName;
-        } else {
-            return "http://" + serverIp + ":8080/SavedPhotos/Businesses/default.jpg";
-        }
-    }
 }

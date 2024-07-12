@@ -1,8 +1,10 @@
 package com.example.booking.dataproviders.mappers;
 
+import com.example.booking.constants.Constants;
 import com.example.booking.dataproviders.dto.roomDTOs.RequestRoomDTO;
 import com.example.booking.dataproviders.dto.roomDTOs.ResponseRoomDTO;
 import com.example.booking.dataproviders.entities.Rooms;
+import com.example.booking.dataproviders.services.utilities.ValidationUtilities;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -23,38 +25,13 @@ public class RoomMapper {
         responseRoomDTO.setDescription(room.getDescription());
 
         String imageFileName = room.getImage();
-        responseRoomDTO.setImage(getRoomImageUrl(imageFileName));
+        responseRoomDTO.setImage(ValidationUtilities.getRoomImageUrl(imageFileName, Constants.ROOM));
 
         responseRoomDTO.setRoomType(room.getRoomType());
         responseRoomDTO.setBusinessId(room.getBusinesses().getBusinessId());
         return responseRoomDTO;
     }
 
-    public static String getPublicIpAddress() {
-        try (final DatagramSocket datagramSocket = new DatagramSocket()) {
-            datagramSocket.connect(InetAddress.getByName("8.8.8.8"), 12345);
-            return datagramSocket.getLocalAddress().getHostAddress();
-        } catch (IOException e) {
-            e.printStackTrace(); // Handle exception as needed
-            return "Failed to retrieve public IP";
-        }
-    }
-
-    private String getRoomImageUrl(String imageFileName) {
-
-//        String serverIp = "192.168.1.32";
-        String serverIp = getPublicIpAddress();
-
-
-        if (imageFileName != null) {
-            String fileUrl = "http://" + serverIp + ":8080/SavedPhotos/Rooms/" + imageFileName;
-            return fileUrl;
-        }else {
-            return "http://" + serverIp + ":8080/SavedPhotos/Rooms/default.jpeg";
-        }
-
-
-    }
 
     public Rooms mapToEntity(RequestRoomDTO requestRoomDTO){
 

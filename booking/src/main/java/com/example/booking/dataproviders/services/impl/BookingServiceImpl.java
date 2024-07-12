@@ -60,8 +60,9 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public List<ResponseBookingHistoryDTO> getBookingHistory(String username) {
-        User user = userRepository.findUserByUsername(username).orElseThrow(
-                () -> new RecordNotFoundException(Constants.USER_NOT_FOUND));
+//        User user = userRepository.findUserByUsername(username).orElseThrow(
+//                () -> new RecordNotFoundException(Constants.USER_NOT_FOUND));
+        User user = utilitiesService.validateUser(username,Constants.USER);
         List<Booking> bookings = bookingRepository.findByUser(user);
 
         return bookings.stream()
@@ -94,7 +95,7 @@ public class BookingServiceImpl implements BookingService {
 //            throw new AuthenticationFailedException(Constants.INSUFFICIENT_PRIVILEGES);
 //        }
 
-        User user = utilitiesService.validateUser(username,"USER");
+        User user = utilitiesService.validateUser(username,Constants.USER);
 
         Booking booking = bookingMapper.mapToEntity(requestBookingDTO);
 
@@ -125,6 +126,10 @@ public class BookingServiceImpl implements BookingService {
         
         booking.setUser(user);
 
+        int discountPoints = user.getUserInfo().getDiscountPoints();
+        double discount = discountPoints >= Constants.DISCOUNT_THRESHOLD ? discountPoints * Constants.DISCOUNT_MULTIPLIER : 0;
+        if (discountPoints>=Constants.DISCOUNT_THRESHOLD) user.getUserInfo().setDiscountPoints(0);
+
         int points = user.getUserInfo().getDiscountPoints()+3;
         user.getUserInfo().setDiscountPoints(points);
         userInfoRepository.save(user.getUserInfo());
@@ -135,7 +140,7 @@ public class BookingServiceImpl implements BookingService {
 
         Payment payment = paymentMapper.mapToEntity(requestBookingDTO);
         double totalPrice = utilitiesService.calculateTotalPrice(room, booking.getCheckInDate(), booking.getCheckOutDate());
-        payment.setTotalPrice(totalPrice);
+        payment.setTotalPrice(totalPrice+totalPrice*room.getBusinesses().getTax()-discount);//totalPrice+totalPrice*tax-discount
 
 
         if (!isForAnother && !booking.getFullName().equals(payment.getCardHolderName())) {

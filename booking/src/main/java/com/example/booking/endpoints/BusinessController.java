@@ -5,6 +5,7 @@ import com.example.booking.dataproviders.dto.businessDTOs.ResponseBusinessDTO;
 import com.example.booking.dataproviders.dto.searchDTOs.RequestSearchDTO;
 import com.example.booking.dataproviders.dto.searchDTOs.ResponseSearchDTO;
 import com.example.booking.dataproviders.services.BusinessService;
+import com.example.booking.dataproviders.services.utilities.UtilitiesService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -19,6 +20,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -48,40 +50,46 @@ public class BusinessController {
     }
 
     @GetMapping("/admin")
-    public ResponseEntity<List<String>> findAllBusinessesOfAdmin() {
+    public ResponseEntity<List<String>> findAllBusinessesOfAdmin(Principal principal) {
 
-            SecurityContext context = SecurityContextHolder.getContext();
-            String username = context.getAuthentication().getName();
+//            SecurityContext context = SecurityContextHolder.getContext();
+//            String username = context.getAuthentication().getName();
+//        String username = UtilitiesService.getCurrentUsername();
+        String username = principal.getName();
             List<String> businesses = businessService.findAllBusinessesOfAdmin(username);
             return new ResponseEntity<>(businesses, HttpStatus.OK);
 
     }
 
     @PostMapping("/search")
-    public ResponseEntity<?/*Page<ResponseSearchDTO>*/> searchBookings(@Valid @RequestBody RequestSearchDTO searchRequest,
-                                                                  BindingResult bindingResult) throws MethodArgumentNotValidException, NoSuchMethodException {
-        if (bindingResult.hasErrors()) {
-            MethodParameter methodParameter = new MethodParameter(this.getClass().getMethod("searchBookings", RequestSearchDTO.class, BindingResult.class), 0);
-            throw new MethodArgumentNotValidException(methodParameter, bindingResult);
-        }
+    public ResponseEntity<?/*Page<ResponseSearchDTO>*/> searchBookings(@Valid @RequestBody RequestSearchDTO searchRequest,Principal principal
+                                                                  /*BindingResult bindingResult*/) throws MethodArgumentNotValidException, NoSuchMethodException {
+//        if (bindingResult.hasErrors()) {
+//            MethodParameter methodParameter = new MethodParameter(this.getClass().getMethod("searchBookings", RequestSearchDTO.class, BindingResult.class), 0);
+//            throw new MethodArgumentNotValidException(methodParameter, bindingResult);
+//        }
 
-        Page<ResponseSearchDTO> searchResults = businessService.search(searchRequest);
+//        String username = UtilitiesService.getCurrentUsername();
+        String username = principal.getName();
+        Page<ResponseSearchDTO> searchResults = businessService.search(searchRequest,username);
         return ResponseEntity.ok(searchResults);
     }
 
     @PostMapping("/save")
-    public ResponseEntity<?/*ResponseBusinessDTO*/> saveBusiness(@Valid @ModelAttribute RequestBusinessDTO requestBusinessDTO,
-                                                            BindingResult bindingResult
+    public ResponseEntity<?/*ResponseBusinessDTO*/> saveBusiness(@Valid @ModelAttribute RequestBusinessDTO requestBusinessDTO,Principal principal
+                                                            /*,BindingResult bindingResult*/
             /*@Valid @RequestBody RequestBusinessDTO requestBusinessDTO*/) throws MethodArgumentNotValidException, NoSuchMethodException {
 
-        if (bindingResult.hasErrors()) {
-            MethodParameter methodParameter = new MethodParameter(this.getClass().getMethod("saveBusiness", RequestBusinessDTO.class, BindingResult.class), 0);
-            throw new MethodArgumentNotValidException(methodParameter, bindingResult);
-        }
+//        if (bindingResult.hasErrors()) {
+//            MethodParameter methodParameter = new MethodParameter(this.getClass().getMethod("saveBusiness", RequestBusinessDTO.class, BindingResult.class), 0);
+//            throw new MethodArgumentNotValidException(methodParameter, bindingResult);
+//        }
 
 
-        SecurityContext context = SecurityContextHolder.getContext();
-        String username = context.getAuthentication().getName();
+//        SecurityContext context = SecurityContextHolder.getContext();
+//        String username = context.getAuthentication().getName();
+//        String username = UtilitiesService.getCurrentUsername();
+        String username = principal.getName();
         return new ResponseEntity<>(businessService.saveBusiness(requestBusinessDTO,username), HttpStatus.CREATED);
 
 

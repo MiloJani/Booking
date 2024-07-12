@@ -1,6 +1,14 @@
 package com.example.booking.constants;
 
 public class Constants {
+
+    public static final String USER = "USER";
+    public static final String ADMIN = "ADMIN";
+    public static final String ROOM = "Rooms";
+    public static final String BUSINESS = "Businesses";
+    public static final int DISCOUNT_THRESHOLD = 10;
+    public static final int DISCOUNT_MULTIPLIER = 2;
+
     // User related constants
     public static final String USER_NOT_FOUND = "User not found";
     public static final String INSUFFICIENT_PRIVILEGES = "User does not have sufficient privileges";

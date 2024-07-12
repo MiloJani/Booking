@@ -12,6 +12,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
@@ -58,6 +60,34 @@ public class ValidationUtilities {
         } catch (IOException e) {
             throw new FileCouldNotBeSavedException(Constants.FILE_SAVE_FAILED);
         }
+    }
+
+
+    public static String getPublicIpAddress() {
+        try (final DatagramSocket datagramSocket = new DatagramSocket()) {
+            datagramSocket.connect(InetAddress.getByName("8.8.8.8"), 12345);
+            return datagramSocket.getLocalAddress().getHostAddress();
+        } catch (IOException e) {
+            e.printStackTrace(); // Handle exception as needed
+            return "Failed to retrieve public IP";
+        }
+    }
+
+    public static String getRoomImageUrl(String imageFileName,String folder) {
+
+//        String serverIp = "https://e51b-79-106-203-48.ngrok-free.app"; //per ngrok hiq http dhe :8080
+        String serverIp = getPublicIpAddress();
+
+
+        if (imageFileName != null) {
+//            String fileUrl =  serverIp + "/SavedPhotos/"+folder+"/" + imageFileName; //ngrok
+            String fileUrl = "http://" + serverIp + ":8080/SavedPhotos/"+folder+"/" + imageFileName;
+            return fileUrl;
+        } else {
+//            return serverIp + "/SavedPhotos/"+folder+"/" + imageFileName; //ngrok
+            return "http://" + serverIp + ":8080/SavedPhotos/"+folder+"/default.jpeg";
+        }
+
     }
 
 }

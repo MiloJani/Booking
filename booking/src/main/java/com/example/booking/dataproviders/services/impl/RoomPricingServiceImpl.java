@@ -12,6 +12,7 @@ import com.example.booking.dataproviders.repositories.RoomPricingRepository;
 import com.example.booking.dataproviders.repositories.RoomRepository;
 import com.example.booking.dataproviders.repositories.UserRepository;
 import com.example.booking.dataproviders.services.RoomPricingService;
+import com.example.booking.dataproviders.services.utilities.UtilitiesService;
 import com.example.booking.dataproviders.services.utilities.ValidationUtilities;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,7 @@ public class RoomPricingServiceImpl implements RoomPricingService {
     private final RoomRepository roomRepository;
     private final RoomPricingMapper roomPricingMapper;
     private final UserRepository userRepository;
+    private final UtilitiesService utilitiesService;
 
     @Override
     public List<ResponseRoomPricingDTO> findAllRoomPricings() {
@@ -49,15 +51,17 @@ public class RoomPricingServiceImpl implements RoomPricingService {
     @Transactional
     public WeekRoomPricingResponseDTO getWeekRoomPricings(RequestRoomPricingsDTO roomPricingsDTO, String username) {
 
-        User user = userRepository.findUserByUsername(username)
-                .orElseThrow(() -> new RecordNotFoundException(Constants.USER_NOT_FOUND));
+//        User user = userRepository.findUserByUsername(username)
+//                .orElseThrow(() -> new RecordNotFoundException(Constants.USER_NOT_FOUND));
+//
+//        if (!user.getRole().getRoleName().equals("USER")) {
+//            throw new AuthenticationFailedException(Constants.INSUFFICIENT_PRIVILEGES);
+//        }
 
-        if (!user.getRole().getRoleName().equals("USER")) {
-            throw new AuthenticationFailedException(Constants.INSUFFICIENT_PRIVILEGES);
-        }
+        User user = utilitiesService.validateUser(username,Constants.USER);
 
         int discountPoints = user.getUserInfo().getDiscountPoints();
-        double discount = discountPoints >= 10 ? discountPoints * 2 : 0;
+        double discount = discountPoints >= Constants.DISCOUNT_THRESHOLD ? discountPoints * Constants.DISCOUNT_MULTIPLIER : 0;
 
         Rooms room = roomRepository.findById(roomPricingsDTO.getRoomId())
                 .orElseThrow(() -> new RecordNotFoundException(Constants.ROOM_NOT_FOUND));
@@ -96,10 +100,12 @@ public class RoomPricingServiceImpl implements RoomPricingService {
 //                })
 //                .collect(Collectors.toList());
 
-        return new WeekRoomPricingResponseDTO(
-                responsePricings, room.getBusinesses().getTax(), discount,room.getDescription(),
-                room.getBusinesses().isFreeParking(),room.getBusinesses().isFreeWifi(),
-                room.getBusinesses().isInsidePool(),room.getBusinesses().isFreeBreakfast());
+//        return new WeekRoomPricingResponseDTO(
+//                responsePricings, room.getBusinesses().getTax(), discount,room.getDescription(),
+//                room.getBusinesses().isFreeParking(),room.getBusinesses().isFreeWifi(),
+//                room.getBusinesses().isInsidePool(),room.getBusinesses().isFreeBreakfast());
+
+        return roomPricingMapper.mapToWeekRoomPricingResponseDTO(room,responsePricings,discount);
     }
 
 

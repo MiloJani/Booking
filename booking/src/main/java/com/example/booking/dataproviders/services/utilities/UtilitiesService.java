@@ -13,7 +13,12 @@ import com.example.booking.dataproviders.repositories.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.MethodParameter;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -32,11 +37,11 @@ public class UtilitiesService {
                 booking.getBookingDate().isEqual(booking.getCheckOutDate()) ||
                 (booking.getBookingDate().isAfter(booking.getCheckInDate()) &&
                         booking.getBookingDate().isBefore(booking.getCheckOutDate()))) {
-            booking.setStatus("Checked In");
+            booking.setStatus("CheckedIn");
         } else if (booking.getBookingDate().isBefore(booking.getCheckInDate())) {
             booking.setStatus("Booked");
         } else {
-            booking.setStatus("Checked Out");
+            booking.setStatus("CheckedOut");
         }
     }
 
@@ -68,5 +73,17 @@ public class UtilitiesService {
 
         return user;
     }
+
+    public static String getCurrentUsername() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof UserDetails) {
+            return ((UserDetails) principal).getUsername();
+        } else {
+            return principal.toString();
+        }
+    }
+
+
+
 
 }

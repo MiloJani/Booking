@@ -36,12 +36,9 @@ public class AuthenticationController {
 
     @PostMapping("/authenticate")
     public ResponseEntity<?/*AuthenticationResponse*/> authenticate(
-            @Valid @RequestBody AuthenticationRequest request, BindingResult bindingResult
+            @Valid @RequestBody AuthenticationRequest request
             ) throws MethodArgumentNotValidException, NoSuchMethodException {
-        if (bindingResult.hasErrors()) {
-            MethodParameter methodParameter = new MethodParameter(this.getClass().getMethod("authenticate", AuthenticationRequest.class, BindingResult.class), 0);
-            throw new MethodArgumentNotValidException(methodParameter, bindingResult);
-        }
+
         return ResponseEntity.ok(authenticationService.authenticate(request));
     }
 

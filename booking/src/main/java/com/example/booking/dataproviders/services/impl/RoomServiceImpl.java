@@ -19,10 +19,7 @@ import com.example.booking.dataproviders.services.utilities.UtilitiesService;
 import com.example.booking.dataproviders.services.utilities.ValidationUtilities;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -33,6 +30,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -103,16 +101,6 @@ public class RoomServiceImpl implements RoomService {
         LocalDate checkInDate = LocalDate.parse(requestAvailableRoomsDTO.getCheckInDate(), formatter);
         LocalDate checkOutDate = LocalDate.parse(requestAvailableRoomsDTO.getCheckOutDate(), formatter);
 
-//        LocalDate checkInDate;
-//        LocalDate checkOutDate;
-//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-//        try {
-//            checkInDate = LocalDate.parse(requestAvailableRoomsDTO.getCheckInDate(), formatter);
-//            checkOutDate = LocalDate.parse(requestAvailableRoomsDTO.getCheckOutDate(), formatter);
-//        } catch (Exception e) {
-//            throw new NotCorrectDataException(Constants.INVALID_DATE_FORMAT);
-//        }
-
         int size = 10;
         Sort sort = Sort.by(Sort.Direction.ASC, "price"); // Default sort by price ascending
         if ("desc".equalsIgnoreCase(requestAvailableRoomsDTO.getSortDirection())) {
@@ -123,7 +111,6 @@ public class RoomServiceImpl implements RoomService {
 
         Pageable pageable = PageRequest.of(requestAvailableRoomsDTO.getPage(), size, sort);
 
-        // Assuming roomRepository has a method to find available rooms by business ID and capacity
         List<Long> availableRoomIds = roomRepository.findAvailableRoomIds(
                 requestAvailableRoomsDTO.getBusinessId(),
                 checkInDate,
@@ -131,22 +118,56 @@ public class RoomServiceImpl implements RoomService {
                 requestAvailableRoomsDTO.getCapacity()
         );
 
-        Page<Rooms> rooms = roomRepository.findByBusinesses_BusinessIdAndRoomIdIn(
+//        Page<Rooms> rooms = roomRepository.findByBusinesses_BusinessIdAndRoomIdIn(
+//                requestAvailableRoomsDTO.getBusinessId(),
+//                Set.copyOf(availableRoomIds),
+//                pageable
+//        );
+//
+////        return rooms.map(room -> roomMapper.mapToDto(room));
+//
+//        return rooms.map(room -> {
+//            ResponseRoomDTO responseRoomDTO = roomMapper.mapToDto(room);
+//            double totalPriceForNights = utilitiesService.calculateTotalPrice(room, checkInDate, checkOutDate);
+//            long numberOfNights = ChronoUnit.DAYS.between(checkInDate, checkOutDate);
+//            responseRoomDTO.setTotalPriceForNights(totalPriceForNights);
+//            responseRoomDTO.setNumberOfNights(numberOfNights);
+//            return responseRoomDTO;
+//        });
+
+        Page<Rooms> roomsPage = roomRepository.findByBusinesses_BusinessIdAndRoomIdIn(
                 requestAvailableRoomsDTO.getBusinessId(),
                 Set.copyOf(availableRoomIds),
                 pageable
         );
 
-//        return rooms.map(room -> roomMapper.mapToDto(room));
+        // Calculate total price for each room
+        Map<Rooms, Double> roomTotalPriceMap = roomsPage.getContent().stream()
+                .collect(Collectors.toMap(
+                        room -> room,
+                        room -> utilitiesService.calculateTotalPrice(room, checkInDate, checkOutDate)
+                ));
 
-        return rooms.map(room -> {
-            ResponseRoomDTO responseRoomDTO = roomMapper.mapToDto(room);
-            double totalPriceForNights = utilitiesService.calculateTotalPrice(room, checkInDate, checkOutDate);
-            long numberOfNights = ChronoUnit.DAYS.between(checkInDate, checkOutDate);
-            responseRoomDTO.setTotalPriceForNights(totalPriceForNights);
-            responseRoomDTO.setNumberOfNights(numberOfNights);
-            return responseRoomDTO;
-        });
+        // Map rooms to DTOs and set total price for nights
+        List<ResponseRoomDTO> responseRoomDTOS = roomsPage.getContent().stream()
+                .map(room -> {
+                    ResponseRoomDTO responseRoomDTO = roomMapper.mapToDto(room);
+                    responseRoomDTO.setTotalPriceForNights(roomTotalPriceMap.get(room));
+                    responseRoomDTO.setNumberOfNights(ChronoUnit.DAYS.between(checkInDate, checkOutDate));
+                    return responseRoomDTO;
+                })
+                .collect(Collectors.toList());
+
+        // Sort responseRoomDTOS based on totalPriceForNights
+        if ("desc".equalsIgnoreCase(requestAvailableRoomsDTO.getSortDirection())) {
+            responseRoomDTOS.sort(Comparator.comparingDouble(ResponseRoomDTO::getTotalPriceForNights).reversed());
+        } else {
+            responseRoomDTOS.sort(Comparator.comparingDouble(ResponseRoomDTO::getTotalPriceForNights));
+        }
+
+        // Return a Page object
+        return new PageImpl<>(responseRoomDTOS, pageable, roomsPage.getTotalElements());
+
     }
 
 //    public double calculateTotalPrice(Rooms room, LocalDate checkInDate, LocalDate checkOutDate) {

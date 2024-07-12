@@ -25,4 +25,7 @@ public class WeekRoomPricingResponseDTO {
     private boolean insidePool;
 
     private boolean freeBreakfast;
+
+    private String image;
+
 }

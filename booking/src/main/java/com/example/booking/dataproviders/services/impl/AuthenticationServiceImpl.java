@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -62,7 +63,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
             return generateAuthenticationResponse(userDetails, jwtToken, roleName);
 
-        } catch (Exception e) {
+        } catch (AuthenticationException e) {
             throw new AuthenticationFailedException(Constants.UNABLE_TO_LOGIN);
         }
     }
@@ -72,14 +73,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         response.setToken(jwtToken);
         response.setRoleName(roleName);
 
-        if (Objects.equals(roleName, "USER")) {
+        if (Objects.equals(roleName, Constants.USER)) {
             User user = userRepository.findUserByUsername(userDetails.getUsername())
                     .orElseThrow(() -> new RecordNotFoundException(Constants.USER_NOT_FOUND));
             response.setFullName(user.getUserInfo().getFullName());
             response.setPoints(user.getUserInfo().getDiscountPoints());
             response.setBooks(bookingRepository.countByUser(user));
-        } else if (Objects.equals(roleName, "ADMIN")) {
-            response.setFullName("ADMIN");
+        } else if (Objects.equals(roleName, Constants.ADMIN)) {
+            response.setFullName(Constants.ADMIN);
         } else {
             throw new AuthenticationFailedException(Constants.INSUFFICIENT_PRIVILEGES);
         }

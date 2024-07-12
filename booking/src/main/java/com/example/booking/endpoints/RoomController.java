@@ -7,6 +7,7 @@ import com.example.booking.dataproviders.dto.roomDTOs.RequestRoomDTO;
 import com.example.booking.dataproviders.dto.roomDTOs.ResponseRoomDTO;
 import com.example.booking.dataproviders.dto.searchDTOs.RequestSearchDTO;
 import com.example.booking.dataproviders.services.RoomService;
+import com.example.booking.dataproviders.services.utilities.UtilitiesService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -20,6 +21,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,31 +45,35 @@ public class RoomController {
     }
 
     @PostMapping("/getAvailableRooms")
-    public ResponseEntity<?> getAvailableRooms(@Valid @RequestBody RequestAvailableRoomsDTO requestAvailableRoomsDTO,
-                                               BindingResult bindingResult) throws MethodArgumentNotValidException, NoSuchMethodException {
+    public ResponseEntity<?> getAvailableRooms(@Valid @RequestBody RequestAvailableRoomsDTO requestAvailableRoomsDTO, Principal principal
+                                               /*BindingResult bindingResult*/) throws MethodArgumentNotValidException, NoSuchMethodException {
 
-        if (bindingResult.hasErrors()) {
-            MethodParameter methodParameter = new MethodParameter(this.getClass().getMethod("getAvailableRooms", RequestAvailableRoomsDTO.class, BindingResult.class), 0);
-            throw new MethodArgumentNotValidException(methodParameter, bindingResult);
-        }
+//        if (bindingResult.hasErrors()) {
+//            MethodParameter methodParameter = new MethodParameter(this.getClass().getMethod("getAvailableRooms", RequestAvailableRoomsDTO.class, BindingResult.class), 0);
+//            throw new MethodArgumentNotValidException(methodParameter, bindingResult);
+//        }
 
-        SecurityContext context = SecurityContextHolder.getContext();
-        String username = context.getAuthentication().getName();
+//        SecurityContext context = SecurityContextHolder.getContext();
+//        String username = context.getAuthentication().getName();
+//        String username = UtilitiesService.getCurrentUsername();
+        String username = principal.getName();
         return new ResponseEntity<>(roomService.getAllAvailableRooms(requestAvailableRoomsDTO,username), HttpStatus.OK);
 
     }
 
     @PostMapping("/save")
     public ResponseEntity<?/*ResponseRoomDTO*/> saveRoom(@Valid @ModelAttribute RequestRoomDTO requestRoomDTO/*@Valid @RequestBody RequestRoomDTO requestRoomDTO*/
-    , BindingResult bindingResult) throws MethodArgumentNotValidException, NoSuchMethodException {
+    ,Principal principal/* BindingResult bindingResult*/) throws MethodArgumentNotValidException, NoSuchMethodException {
 
-        if (bindingResult.hasErrors()) {
-            MethodParameter methodParameter = new MethodParameter(this.getClass().getMethod("saveRoom", RequestRoomDTO.class, BindingResult.class), 0);
-            throw new MethodArgumentNotValidException(methodParameter, bindingResult);
-        }
+//        if (bindingResult.hasErrors()) {
+//            MethodParameter methodParameter = new MethodParameter(this.getClass().getMethod("saveRoom", RequestRoomDTO.class, BindingResult.class), 0);
+//            throw new MethodArgumentNotValidException(methodParameter, bindingResult);
+//        }
 
-        SecurityContext context = SecurityContextHolder.getContext();
-        String username = context.getAuthentication().getName();
+//        SecurityContext context = SecurityContextHolder.getContext();
+//        String username = context.getAuthentication().getName();
+//        String username = UtilitiesService.getCurrentUsername();
+        String username = principal.getName();
         return new ResponseEntity<>(roomService.createRoom(requestRoomDTO,username), HttpStatus.CREATED);
 
 
