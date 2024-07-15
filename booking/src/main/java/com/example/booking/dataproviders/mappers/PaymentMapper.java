@@ -1,5 +1,6 @@
 package com.example.booking.dataproviders.mappers;
 
+import com.example.booking.constants.Constants;
 import com.example.booking.core.exceptions.NotCorrectDataException;
 import com.example.booking.dataproviders.dto.paymentDTOs.RequestPaymentDTO;
 import com.example.booking.dataproviders.dto.paymentDTOs.ResponsePaymentDTO;
@@ -24,7 +25,7 @@ public class PaymentMapper {
         try {
             String[] expirationParts = requestPaymentDTO.getExpirationDate().split("/");
             if (expirationParts.length != 2) {
-                throw new NotCorrectDataException("Invalid expiration date format. Please use MM/YY format.");
+                throw new NotCorrectDataException(Constants.INVALID_DATE_FORMAT);
             }
 
             int expirationMonth = Integer.parseInt(expirationParts[0]);
@@ -34,7 +35,7 @@ public class PaymentMapper {
             LocalDate currentDate = LocalDate.now();
             YearMonth cardExpiry = YearMonth.of(expirationYear, expirationMonth);
             if (cardExpiry.isBefore(YearMonth.from(currentDate))) {
-                throw new NotCorrectDataException("Card is expired");
+                throw new NotCorrectDataException(Constants.CARD_EXPIRED);
             }
 
             payment.setExpirationMonth(expirationMonth);
@@ -42,12 +43,12 @@ public class PaymentMapper {
 
             int cvv = requestPaymentDTO.getCvv();
             if (String.valueOf(cvv).length() != 3) {
-                throw new NotCorrectDataException("CVV must be exactly 3 digits long.");
+                throw new NotCorrectDataException(Constants.CVV_WRONG_FORMAT);
             }
             payment.setCvv(cvv);
 
         } catch (NumberFormatException | DateTimeException e) {
-            throw new NotCorrectDataException("Invalid expiration date. Please ensure the date is in MM/YY format and is valid.");
+            throw new NotCorrectDataException(Constants.INVALID_CARD_EXPIRATION);
         }
 
         return payment;

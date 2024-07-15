@@ -1,5 +1,6 @@
 package com.example.booking.dataproviders.mappers;
 
+import com.example.booking.constants.Constants;
 import com.example.booking.core.exceptions.NotCorrectDataException;
 import com.example.booking.dataproviders.dto.bookingDTOs.RequestBookingDTO;
 import com.example.booking.dataproviders.dto.bookingDTOs.ResponseBookingDTO;
@@ -42,7 +43,7 @@ public class BookingMapper {
                 checkOutDate = LocalDate.parse(requestBookingDTO.getCheckOutDate(), formatter);
                 bookingDate = LocalDate.parse(requestBookingDTO.getBookingDate(), formatter);
             } catch (Exception e) {
-                throw new NotCorrectDataException("Invalid date format. Please provide dates in yyyy-MM-dd format.");
+                throw new NotCorrectDataException(Constants.INVALID_DATE_FORMAT);
             }
 
             Booking booking = new Booking();

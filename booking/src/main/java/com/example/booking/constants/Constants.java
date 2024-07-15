@@ -29,9 +29,14 @@ public class Constants {
     public static final String BUSINESS_ALREADY_EXISTS = "Business already exists";
     public static final String BUSINESS_SAVED = "Business saved successfully";
 
-    //Booking related
+    //Booking/Payment related
     public static final String BOOKING_NOT_FOUND = "Booking not found";
     public static final String BOOKING_ALREADY_EXISTS = "Booking already exists";
+    public static final String CARD_EXPIRED = "Card has expired";
+    public static final String CVV_WRONG_FORMAT = "CVV must be exactly 3 digits long";
+    public static final String INVALID_CARD_EXPIRATION = "Invalid expiration date. Please ensure the date is in MM/YY format and is valid.";
+
+
 
     // File related constants
     public static final String FILE_TOO_LARGE = "File size must be less than or equal to 100KB";
