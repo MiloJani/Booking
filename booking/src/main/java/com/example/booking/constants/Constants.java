@@ -22,10 +22,12 @@ public class Constants {
     public static final String ROOM_NOT_FOUND = "Room not found";
     public static final String ROOM_ALREADY_EXISTS = "Room with the same name already exists under this business";
     public static final String ROOM_PRICING_NOT_FOUND = "Room pricing not found";
+    public static final String ROOM_SAVED = "Room saved successfully";
 
     // Business related constants
     public static final String BUSINESS_NOT_FOUND = "Business not found";
     public static final String BUSINESS_ALREADY_EXISTS = "Business already exists";
+    public static final String BUSINESS_SAVED = "Business saved successfully";
 
     //Booking related
     public static final String BOOKING_NOT_FOUND = "Booking not found";

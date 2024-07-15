@@ -1,15 +1,16 @@
 Shto user nepermjet swagger /api/auth/save dhe api/auth/saveAdmin
 
-Shto role "USER", "ADMIN" ne databaze
+Shto role "USER", "ADMIN" ne databaze(perpara user-it)
 
 Databaza supozohet te krijohet vete sepse eshte vendosur nje kontroll per te pare nqs ekziston
-,ne rast se nuk shtohet vet taksirat krijoje pak
+(booking?createDatabaseIfNotExist=true),ne rast se nuk shtohet vete taksirat duhet krijuar
 
 Ne lidhje me fotot duhet krijuar folderi SavedPhotos dhe brenda tij folderat Businesses dhe Rooms
 
-Si rezultat duhet ndryshuar uploadDir kur ruhet biznesi dhe dhoma
-(tani po mendoj se pathin duhej ta kisha vendosur si konstante por do largohem tani dhe duhet te dorezoj repon,taksirat (: )
+Si rezultat duhet ndryshuar uploadDir tek constants pasi mund te ndryshoje nga kompjuteri ne kompjuter
 
 Ne add config duhet ndryshuar dhe addResourceLocation duhet vendosur pathi qe keni ne kompjuterin tuaj
 
-Per ndonje problem tjeter me shkruani se mos kam harruar nai gje
+Per ndonje problem tjeter me shkruani se mos kam harruar ndonje gje
+
+Faleminderit

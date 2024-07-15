@@ -98,6 +98,12 @@ public class RoomServiceImpl implements RoomService {
             rooms.sort(Comparator.comparingDouble(roomTotalPriceMap::get));
         }
 
+//        Comparator<Rooms> comparator = Comparator.comparingDouble(roomTotalPriceMap::get);
+//        if ("desc".equalsIgnoreCase(requestAvailableRoomsDTO.getSortDirection())) {
+//            comparator = comparator.reversed();
+//        }
+//        rooms.sort(comparator);
+
         // (Creating a sub list)Paginate the sorted list starting from the first element of the current page to the last element of the page
         int start = (int) pageable.getOffset();
         int end = Math.min((start + pageable.getPageSize()), rooms.size());
@@ -141,7 +147,8 @@ public class RoomServiceImpl implements RoomService {
         }
 
         //change based on your directory
-        String uploadDir = "C:\\Users\\USER\\Desktop\\SavedPhotos\\Rooms\\";//Constants.ROOM_UPLOAD_DIR
+//        String uploadDir = "C:\\Users\\USER\\Desktop\\SavedPhotos\\Rooms\\";//Constants.ROOMS_UPLOAD_DIR
+        String uploadDir = Constants.ROOMS_UPLOAD_DIR;
         String fileName = ValidationUtilities.transferImage(roomDTO.getImage(),uploadDir);
         rooms.setImage(fileName);
 
@@ -152,7 +159,7 @@ public class RoomServiceImpl implements RoomService {
         //create roomPricing for all days of week
         roomPricingServiceImpl.createDefaultRoomPricings(savedRoom);
 
-        return "Room saved successfully";
+        return Constants.ROOM_SAVED;
     }
 
     @Override

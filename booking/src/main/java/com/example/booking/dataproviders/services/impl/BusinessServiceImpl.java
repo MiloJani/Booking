@@ -219,14 +219,15 @@ public class BusinessServiceImpl implements BusinessService {
         businesses.setAdmin(user);
 
         //upload file(make sure to change this based on the directory in you computer)
-        String uploadDir = "C:\\Users\\USER\\Desktop\\SavedPhotos\\Businesses\\";//Constants.BUSINESS_UPLOAD_DIR
+//        String uploadDir = "C:\\Users\\USER\\Desktop\\SavedPhotos\\Businesses\\";//Constants.BUSINESS_UPLOAD_DIR
+        String uploadDir = Constants.BUSINESS_UPLOAD_DIR;
         String fileName = ValidationUtilities.transferImage(requestBusinessDTO.getImage(),uploadDir);
         businesses.setImage(fileName);
 
         businesses.setTax(0.07); //default since no field to put tax was given
         Businesses savedBusiness = businessRepository.save(businesses);
 
-        return "Business saved successfully";
+        return Constants.BUSINESS_SAVED;
     }
 
     @Override

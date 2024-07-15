@@ -9,7 +9,6 @@ import com.example.booking.dataproviders.entities.User;
 import com.example.booking.dataproviders.mappers.RoomPricingMapper;
 import com.example.booking.dataproviders.repositories.RoomPricingRepository;
 import com.example.booking.dataproviders.repositories.RoomRepository;
-import com.example.booking.dataproviders.repositories.UserRepository;
 import com.example.booking.dataproviders.services.RoomPricingService;
 import com.example.booking.dataproviders.services.utilities.UtilitiesService;
 import com.example.booking.dataproviders.services.utilities.ValidationUtilities;

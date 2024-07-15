@@ -1,5 +1,6 @@
 package com.example.booking.dataproviders.services.impl;
 
+import com.example.booking.constants.Constants;
 import com.example.booking.dataproviders.dto.userDTOs.RequestAdminDTO;
 import com.example.booking.dataproviders.dto.userDTOs.RequestUserDTO;
 import com.example.booking.dataproviders.dto.userDTOs.ResponseAdminDTO;
@@ -59,7 +60,7 @@ public class UserServiceImpl implements UserService {
 
         User user = userMapper.mapToEntity(requestUserDTO);
 
-        Role role = roleRepository.findByRoleName("USER").orElseThrow(() -> new RuntimeException("Role not found"));
+        Role role = roleRepository.findByRoleName(Constants.USER).orElseThrow(() -> new RuntimeException("Role not found"));
         user.setRole(role);
 
         UserInfo userInfo = userInfoMapper.mapToEntity(requestUserDTO);
@@ -76,7 +77,7 @@ public class UserServiceImpl implements UserService {
 
         User admin = adminMapper.mapToEntity(requestAdminDTO);
 
-        Role role = roleRepository.findByRoleName("ADMIN").orElseThrow(() -> new RuntimeException("Role not found"));
+        Role role = roleRepository.findByRoleName(Constants.ADMIN).orElseThrow(() -> new RuntimeException("Role not found"));
         admin.setRole(role);
 
         userRepository.save(admin);
