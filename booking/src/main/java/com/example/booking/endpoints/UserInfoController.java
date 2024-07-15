@@ -1,6 +1,5 @@
 package com.example.booking.endpoints;
 
-import com.example.booking.dataproviders.dto.userDTOs.ResponseUserDTO;
 import com.example.booking.dataproviders.dto.userInfoDTOs.ResponseUserInfoDTO;
 import com.example.booking.dataproviders.services.UserInfoService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;

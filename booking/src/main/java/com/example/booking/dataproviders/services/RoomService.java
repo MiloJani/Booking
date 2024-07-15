@@ -6,7 +6,6 @@ import com.example.booking.dataproviders.dto.roomDTOs.ResponseRoomDTO;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
-import java.util.Set;
 
 public interface RoomService {
 
@@ -16,7 +15,7 @@ public interface RoomService {
 
     Page<ResponseRoomDTO> getAllAvailableRooms(RequestAvailableRoomsDTO requestAvailableRoomsDTO, String username);
 
-    /*ResponseRoomDTO*/ String createRoom(RequestRoomDTO roomDTO,String username);
+    String createRoom(RequestRoomDTO roomDTO,String username);
 
     ResponseRoomDTO updateRoom(RequestRoomDTO roomDTO,Long id);
 

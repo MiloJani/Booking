@@ -7,12 +7,9 @@ import com.example.booking.dataproviders.dto.roomDTOs.RequestRoomDTO;
 import com.example.booking.dataproviders.dto.roomDTOs.ResponseRoomDTO;
 import com.example.booking.dataproviders.entities.Businesses;
 import com.example.booking.dataproviders.entities.Rooms;
-import com.example.booking.dataproviders.entities.User;
 import com.example.booking.dataproviders.mappers.RoomMapper;
 import com.example.booking.dataproviders.repositories.BusinessRepository;
-import com.example.booking.dataproviders.repositories.RoomPricingRepository;
 import com.example.booking.dataproviders.repositories.RoomRepository;
-import com.example.booking.dataproviders.repositories.UserRepository;
 import com.example.booking.dataproviders.services.RoomService;
 import com.example.booking.dataproviders.services.utilities.UtilitiesService;
 import com.example.booking.dataproviders.services.utilities.ValidationUtilities;
@@ -33,10 +30,8 @@ public class RoomServiceImpl implements RoomService {
 
     private final RoomRepository roomRepository;
     private final BusinessRepository businessRepository;
-    private final UserRepository userRepository;
     private final RoomMapper roomMapper;
     private final RoomPricingServiceImpl roomPricingServiceImpl;
-    private final RoomPricingRepository roomPricingRepository;
     private final UtilitiesService utilitiesService;
 
 
@@ -59,33 +54,11 @@ public class RoomServiceImpl implements RoomService {
         return roomMapper.mapToDto(room);
     }
 
-//    @Override
-//    public Page<ResponseRoomDTO> getAllAvailableRooms(RequestAvailableRoomsDTO requestAvailableRoomsDTO,String username){
-//
-//
-//        User user = userRepository.findUserByUsername(username)
-//                .orElseThrow(() -> new RecordNotFoundException("User not found"));
-//
-//        if (!user.getRole().getRoleName().equals("USER")) {
-//            throw new AuthenticationFailedException("User does not have sufficient privileges to add a business");
-//        }
-//
-//        int size = 2;
-//        Pageable pageable = PageRequest.of(requestAvailableRoomsDTO.getPage(), size, Sort.by("price").ascending());
-//        Page<Rooms> rooms = roomRepository.findByBusinesses_BusinessIdAndRoomIdIn(requestAvailableRoomsDTO.getBusinessId(),
-//                requestAvailableRoomsDTO.getRoomIds(),pageable);
-//
-//
-//        return rooms.map(room -> roomMapper.mapToDto(room));
-//    }
-
     @Override
     public Page<ResponseRoomDTO> getAllAvailableRooms(RequestAvailableRoomsDTO requestAvailableRoomsDTO, String username)
     throws RecordNotFoundException{
 
-        User user = userRepository.findUserByUsername(username)
-                .orElseThrow(() -> new RecordNotFoundException("User not found"));
-
+        //validate dates and conversion
         ValidationUtilities.validateDates(requestAvailableRoomsDTO.getCheckInDate()
                 ,requestAvailableRoomsDTO.getCheckOutDate());
 
@@ -94,15 +67,10 @@ public class RoomServiceImpl implements RoomService {
         LocalDate checkOutDate = LocalDate.parse(requestAvailableRoomsDTO.getCheckOutDate(), formatter);
 
         int size = 10;
-//        Sort sort = Sort.by(Sort.Direction.ASC, "price"); // Default sort by price ascending
-//        if ("desc".equalsIgnoreCase(requestAvailableRoomsDTO.getSortDirection())) {
-//            sort = Sort.by(Sort.Direction.DESC, requestAvailableRoomsDTO.getSortBy());
-//        } else if ("asc".equalsIgnoreCase(requestAvailableRoomsDTO.getSortDirection())) {
-//            sort = Sort.by(Sort.Direction.ASC, requestAvailableRoomsDTO.getSortBy());
-//        }
 
-        Pageable pageable = PageRequest.of(requestAvailableRoomsDTO.getPage(), size/*, sort*/);
+        Pageable pageable = PageRequest.of(requestAvailableRoomsDTO.getPage(), size);
 
+        //get all available rooms ids
         List<Long> availableRoomIds = roomRepository.findAvailableRoomIds(
                 requestAvailableRoomsDTO.getBusinessId(),
                 checkInDate,
@@ -110,38 +78,33 @@ public class RoomServiceImpl implements RoomService {
                 requestAvailableRoomsDTO.getCapacity()
         );
 
-//        Page<Rooms> rooms = roomRepository.findByBusinesses_BusinessIdAndRoomIdIn(
-//                requestAvailableRoomsDTO.getBusinessId(),
-//                Set.copyOf(availableRoomIds),
-//                pageable
-//        );
-//
-////        return rooms.map(room -> roomMapper.mapToDto(room));
-//
-//        return rooms.map(room -> {
-//            ResponseRoomDTO responseRoomDTO = roomMapper.mapToDto(room);
-//            double totalPriceForNights = utilitiesService.calculateTotalPrice(room, checkInDate, checkOutDate);
-//            long numberOfNights = ChronoUnit.DAYS.between(checkInDate, checkOutDate);
-//            responseRoomDTO.setTotalPriceForNights(totalPriceForNights);
-//            responseRoomDTO.setNumberOfNights(numberOfNights);
-//            return responseRoomDTO;
-//        });
-
-        Page<Rooms> roomsPage = roomRepository.findByBusinesses_BusinessIdAndRoomIdIn(
+        // Fetch all rooms from their id and the businessId
+        List<Rooms> rooms = roomRepository.findByBusinesses_BusinessIdAndRoomIdIn(
                 requestAvailableRoomsDTO.getBusinessId(),
-                Set.copyOf(availableRoomIds),
-                pageable
+                Set.copyOf(availableRoomIds)
         );
 
         // Calculate total price for each room
-        Map<Rooms, Double> roomTotalPriceMap = roomsPage.getContent().stream()
+        Map<Rooms, Double> roomTotalPriceMap = rooms.stream()
                 .collect(Collectors.toMap(
                         room -> room,
                         room -> utilitiesService.calculateTotalPrice(room, checkInDate, checkOutDate)
                 ));
 
-        // Map rooms to DTOs and set total price for nights
-        List<ResponseRoomDTO> responseRoomDTOS = roomsPage.getContent().stream()
+        // Sort rooms based on total price for nights
+        if ("desc".equalsIgnoreCase(requestAvailableRoomsDTO.getSortDirection())) {
+            rooms.sort(Comparator.comparingDouble(roomTotalPriceMap::get).reversed());
+        } else {
+            rooms.sort(Comparator.comparingDouble(roomTotalPriceMap::get));
+        }
+
+        // (Creating a sub list)Paginate the sorted list starting from the first element of the current page to the last element of the page
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), rooms.size());
+        List<Rooms> paginatedRooms = rooms.subList(start, end);
+
+        // Map paginated rooms to DTOs and set total price for nights/ number of nights
+        List<ResponseRoomDTO> responseRoomDTOS = paginatedRooms.stream()
                 .map(room -> {
                     ResponseRoomDTO responseRoomDTO = roomMapper.mapToDto(room);
                     responseRoomDTO.setTotalPriceForNights(roomTotalPriceMap.get(room));
@@ -150,15 +113,7 @@ public class RoomServiceImpl implements RoomService {
                 })
                 .collect(Collectors.toList());
 
-        // Sort responseRoomDTOS based on totalPriceForNights
-        if ("desc".equalsIgnoreCase(requestAvailableRoomsDTO.getSortDirection())) {
-            responseRoomDTOS.sort(Comparator.comparingDouble(ResponseRoomDTO::getTotalPriceForNights).reversed());
-        } else {
-            responseRoomDTOS.sort(Comparator.comparingDouble(ResponseRoomDTO::getTotalPriceForNights));
-        }
-
-        // Return a Page object
-        return new PageImpl<>(responseRoomDTOS, pageable, roomsPage.getTotalElements());
+        return new PageImpl<>(responseRoomDTOS, pageable, rooms.size());
 
     }
 
@@ -166,34 +121,36 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     @Transactional
-    public /*ResponseRoomDTO*/ String createRoom(RequestRoomDTO roomDTO,String username)
+    public  String createRoom(RequestRoomDTO roomDTO,String username)
     throws NotCorrectDataException,RecordNotFoundException,RecordAlreadyExistsException{
 
+        //checking capacity and price
         if (Integer.parseInt(roomDTO.getCapacity())<0 || Double.parseDouble(roomDTO.getPrice())<0 ){
             throw new NotCorrectDataException(Constants.INVALID_DATA);
         }
 
         Rooms rooms = roomMapper.mapToEntity(roomDTO);
 
+        //find the business where we are trying to add the room
         Businesses businesses = businessRepository.findByBusinessName(roomDTO.getBusinessName())
                 .orElseThrow(() -> new RecordNotFoundException(Constants.BUSINESS_NOT_FOUND));
 
+        //check if there is a room with the same name for that business
         if (roomRepository.findByRoomNameAndBusinesses(roomDTO.getRoomName(), businesses).isPresent()) {
             throw new RecordAlreadyExistsException(Constants.ROOM_ALREADY_EXISTS);
         }
 
-        User user = userRepository.findUserByUsername(username)
-                .orElseThrow(() -> new RecordNotFoundException(Constants.USER_NOT_FOUND));
-
-        String uploadDir = "C:\\Users\\USER\\Desktop\\SavedPhotos\\Rooms\\";
+        //change based on your directory
+        String uploadDir = "C:\\Users\\USER\\Desktop\\SavedPhotos\\Rooms\\";//Constants.ROOM_UPLOAD_DIR
         String fileName = ValidationUtilities.transferImage(roomDTO.getImage(),uploadDir);
         rooms.setImage(fileName);
 
         rooms.setBusinesses(businesses);
 
         Rooms savedRoom = roomRepository.save(rooms);
+
+        //create roomPricing for all days of week
         roomPricingServiceImpl.createDefaultRoomPricings(savedRoom);
-//        return roomMapper.mapToDto(savedRoom);
 
         return "Room saved successfully";
     }

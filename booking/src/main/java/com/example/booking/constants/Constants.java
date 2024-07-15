@@ -9,6 +9,8 @@ public class Constants {
     public static final String BUSINESS = "Businesses";
     public static final int DISCOUNT_THRESHOLD = 10;
     public static final int DISCOUNT_MULTIPLIER = 2;
+    public static final String BUSINESS_UPLOAD_DIR = "C:\\Users\\USER\\Desktop\\SavedPhotos\\Businesses\\";
+    public static final String ROOMS_UPLOAD_DIR = "C:\\Users\\USER\\Desktop\\SavedPhotos\\Rooms\\";
 
     // User related constants
     public static final String USER_NOT_FOUND = "User not found";

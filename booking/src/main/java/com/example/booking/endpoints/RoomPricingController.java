@@ -2,14 +2,11 @@ package com.example.booking.endpoints;
 
 import com.example.booking.dataproviders.dto.roomPricingDTOs.*;
 import com.example.booking.dataproviders.services.RoomPricingService;
-import com.example.booking.dataproviders.services.utilities.UtilitiesService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -38,9 +35,6 @@ public class RoomPricingController {
     @PostMapping("/room/pricings")
     public ResponseEntity<WeekRoomPricingResponseDTO> getRoomPricings(@Valid @RequestBody RequestRoomPricingsDTO requestRoomPricingsDTO, Principal principal) {
 
-//        SecurityContext context = SecurityContextHolder.getContext();
-//        String username = context.getAuthentication().getName();
-//        String username = UtilitiesService.getCurrentUsername();
         String username = principal.getName();
         WeekRoomPricingResponseDTO dto = roomPricingService.getWeekRoomPricings(requestRoomPricingsDTO,username);
         return ResponseEntity.ok(dto);

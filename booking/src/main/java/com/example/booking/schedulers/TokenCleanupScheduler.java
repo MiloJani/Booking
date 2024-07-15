@@ -19,9 +19,7 @@ public class TokenCleanupScheduler {
         this.tokenBlacklistRepository = tokenBlacklistRepository;
     }
 // sec after hour,min after hour , hours , day , month , week
-    @Scheduled(cron = "0 0 3 * * *") // Runs every day at 3 am
-//    @Scheduled(cron = "0 0 15 * * *") // Runs every day at 3 pm
-//@Scheduled(cron = "0 8 15 * * *")
+@Scheduled(cron = "0 0 3 * * *") // Runs every day at 3 am
 @Transactional
     public void cleanupExpiredTokens() {
         LocalDateTime currentDateTime = LocalDateTime.now();

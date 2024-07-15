@@ -55,13 +55,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 throw new RecordNotFoundException(Constants.USER_NOT_FOUND);
             }
 
+            //generate token and get roleName through authorities
             var jwtToken = jwtService.generateToken(userDetails);
             String roleName = userDetails.getAuthorities().stream()
                     .map(GrantedAuthority::getAuthority)
                     .findFirst()
                     .orElseThrow(() -> new AuthenticationFailedException(Constants.INSUFFICIENT_PRIVILEGES));
 
-
+            //depending on the person who is trying to log in either user or admin we return slightly different response
             return generateAuthenticationResponse(userDetails, jwtToken, roleName);
 
         } catch (AuthenticationException e) {

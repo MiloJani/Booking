@@ -11,7 +11,6 @@ import com.example.booking.dataproviders.entities.User;
 import com.example.booking.dataproviders.mappers.BusinessMapper;
 import com.example.booking.dataproviders.repositories.BusinessRepository;
 import com.example.booking.dataproviders.repositories.RoomRepository;
-import com.example.booking.dataproviders.repositories.UserRepository;
 import com.example.booking.dataproviders.services.BusinessService;
 import com.example.booking.dataproviders.services.utilities.UtilitiesService;
 import com.example.booking.dataproviders.services.utilities.ValidationUtilities;
@@ -34,11 +33,10 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class BusinessServiceImpl implements BusinessService {
 
-    private BusinessRepository businessRepository;
-    private BusinessMapper businessMapper;
-    private UserRepository userRepository;
-    private RoomRepository roomRepository;
-    private UtilitiesService utilitiesService;
+    private final BusinessRepository businessRepository;
+    private final BusinessMapper businessMapper;
+    private final RoomRepository roomRepository;
+    private final UtilitiesService utilitiesService;
 
     @Override
     public List<ResponseBusinessDTO> findAllBusinesses() {
@@ -54,6 +52,7 @@ public class BusinessServiceImpl implements BusinessService {
         return responseBusinessDTOS;
     }
 
+    //return the businesses that belong to the admin currently logged in
     @Override
     public List<String> findAllBusinessesOfAdmin(String username)
             throws RecordNotFoundException,AuthenticationFailedException,NotCorrectDataException {
@@ -81,8 +80,7 @@ public class BusinessServiceImpl implements BusinessService {
     public Page<ResponseSearchDTO> search(RequestSearchDTO searchRequest,String username)
             throws RecordNotFoundException,AuthenticationFailedException,NotCorrectDataException {
 
-        User user = utilitiesService.validateUser(username,Constants.USER);
-
+        //validate dates and turn from string to local date(later found out that you could keep it as LocalDate in request and Spring did the conversion for you)
         ValidationUtilities.validateDates(searchRequest.getCheckInDate(), searchRequest.getCheckOutDate());
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate checkInDate = LocalDate.parse(searchRequest.getCheckInDate(), formatter);
@@ -93,17 +91,7 @@ public class BusinessServiceImpl implements BusinessService {
         Pageable pageable = PageRequest.of(page, size);
         Page<Businesses> businessesPage = businessRepository.findAll(pageable);
 
-//        return businessesPage.map(business -> {
-//            int availableRooms = roomRepository.countAvailableRooms(
-//                    business.getBusinessId(),
-//                    searchRequest.getCheckInDate(),
-//                    searchRequest.getCheckOutDate(),
-//                    calculateCapacity(searchRequest.getNoOfAdults(), searchRequest.getNoOfChildren())
-//            );
-//
-//            return businessMapper.mapToSearchDto(business, availableRooms);
-//        });
-
+        //returns every business alongside the number of free rooms
         return businessesPage.map(business -> {
             int capacity = calculateCapacity(searchRequest.getNoOfAdults(), searchRequest.getNoOfChildren());
             if (capacity>5){ //constants(5)?
@@ -213,29 +201,31 @@ public class BusinessServiceImpl implements BusinessService {
 
     @Override
     @Transactional
-    public /*ResponseBusinessDTO*/String saveBusiness(RequestBusinessDTO requestBusinessDTO, String username)
+    public String saveBusiness(RequestBusinessDTO requestBusinessDTO, String username)
     throws RecordAlreadyExistsException,RecordNotFoundException,AuthenticationFailedException,NotCorrectDataException,FileCouldNotBeSavedException {
 
 
         Optional<Businesses> doesBusinessExist = businessRepository.findByBusinessName(requestBusinessDTO.getName());
 
-        if (doesBusinessExist.isPresent()) {
+        //check if business with the same name exists
+         if (doesBusinessExist.isPresent()) {
             throw new RecordAlreadyExistsException(Constants.BUSINESS_ALREADY_EXISTS);
         }
         Businesses businesses = businessMapper.mapToEntity(requestBusinessDTO);
 
+         //double check for security(not really necessary since filter stops it from entering the first place if authority is not the right one)
         User user = utilitiesService.validateUser(username,Constants.ADMIN);
 
         businesses.setAdmin(user);
 
-        String uploadDir = "C:\\Users\\USER\\Desktop\\SavedPhotos\\Businesses\\";
+        //upload file(make sure to change this based on the directory in you computer)
+        String uploadDir = "C:\\Users\\USER\\Desktop\\SavedPhotos\\Businesses\\";//Constants.BUSINESS_UPLOAD_DIR
         String fileName = ValidationUtilities.transferImage(requestBusinessDTO.getImage(),uploadDir);
         businesses.setImage(fileName);
 
-        businesses.setTax(0.07); //default
+        businesses.setTax(0.07); //default since no field to put tax was given
         Businesses savedBusiness = businessRepository.save(businesses);
 
-//        return businessMapper.mapToDto(savedBusiness);
         return "Business saved successfully";
     }
 

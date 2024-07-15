@@ -4,7 +4,6 @@ import com.example.booking.dataproviders.dto.userDTOs.RequestAdminDTO;
 import com.example.booking.dataproviders.dto.userDTOs.RequestUserDTO;
 import com.example.booking.dataproviders.dto.userDTOs.ResponseAdminDTO;
 import com.example.booking.dataproviders.dto.userDTOs.ResponseUserDTO;
-import com.example.booking.dataproviders.entities.User;
 
 import java.util.List;
 

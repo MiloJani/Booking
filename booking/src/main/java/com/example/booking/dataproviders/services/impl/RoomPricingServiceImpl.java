@@ -1,7 +1,6 @@
 package com.example.booking.dataproviders.services.impl;
 
 import com.example.booking.constants.Constants;
-import com.example.booking.core.exceptions.AuthenticationFailedException;
 import com.example.booking.core.exceptions.RecordNotFoundException;
 import com.example.booking.dataproviders.dto.roomPricingDTOs.*;
 import com.example.booking.dataproviders.entities.RoomPricing;
@@ -33,7 +32,6 @@ public class RoomPricingServiceImpl implements RoomPricingService {
     private final RoomPricingRepository roomPricingRepository;
     private final RoomRepository roomRepository;
     private final RoomPricingMapper roomPricingMapper;
-    private final UserRepository userRepository;
     private final UtilitiesService utilitiesService;
 
     @Override
@@ -53,15 +51,17 @@ public class RoomPricingServiceImpl implements RoomPricingService {
 
         User user = utilitiesService.validateUser(username,Constants.USER);
 
+        //the discount which will be deducted from final price
         int discountPoints = user.getUserInfo().getDiscountPoints();
         double discount = discountPoints >= Constants.DISCOUNT_THRESHOLD ? discountPoints * Constants.DISCOUNT_MULTIPLIER : 0;
 
         Rooms room = roomRepository.findById(roomPricingsDTO.getRoomId())
                 .orElseThrow(() -> new RecordNotFoundException(Constants.ROOM_NOT_FOUND));
 
+        //get all roomPricing for the given room
         List<RoomPricing> roomPricings = roomPricingRepository.findByRoom_RoomId(roomPricingsDTO.getRoomId());
 
-
+        //validating dates and converting them from string to local date
         ValidationUtilities.validateDates(roomPricingsDTO.getCheckInDate()
                 ,roomPricingsDTO.getCheckOutDate());
 
@@ -69,6 +69,7 @@ public class RoomPricingServiceImpl implements RoomPricingService {
         LocalDate checkInDate = LocalDate.parse(roomPricingsDTO.getCheckInDate(), formatter);
         LocalDate checkOutDate = LocalDate.parse(roomPricingsDTO.getCheckOutDate(), formatter);
 
+        //from checkIn Date to check out Date return roomPricing for every date in between(could limit it to max 7(.limit(7)) but front said he would handle it)
         List<ResponseRoomsPricingDTO> responsePricings = checkInDate.datesUntil(checkOutDate.plusDays(1))
                 .map(date -> {
                     DayOfWeek dayOfWeek = date.getDayOfWeek();
@@ -124,6 +125,7 @@ public class RoomPricingServiceImpl implements RoomPricingService {
         roomPricingRepository.delete(roomPricing);
     }
 
+    //default methods to generate roomPricing for each day of the week when a room is saved
     public void createDefaultRoomPricings(Rooms room) {
         EnumSet.allOf(DayOfWeek.class).forEach(dayOfWeek -> {
             RoomPricing roomPricing = new RoomPricing();

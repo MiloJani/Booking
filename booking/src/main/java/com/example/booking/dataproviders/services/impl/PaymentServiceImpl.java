@@ -5,7 +5,7 @@ import com.example.booking.dataproviders.dto.paymentDTOs.ResponsePaymentDTO;
 import com.example.booking.dataproviders.services.PaymentService;
 
 import java.util.List;
-
+//safe to delete... probably will not risk it
 public class PaymentServiceImpl implements PaymentService {
     @Override
     public List<ResponsePaymentDTO> findAllPayments() {

@@ -41,8 +41,8 @@ public class PaymentMapper {
             payment.setExpirationYear(expirationYear);
 
             int cvv = requestPaymentDTO.getCvv();
-            if (String.valueOf(cvv).length() != 4) {
-                throw new NotCorrectDataException("CVV must be exactly 4 digits long.");
+            if (String.valueOf(cvv).length() != 3) {
+                throw new NotCorrectDataException("CVV must be exactly 3 digits long.");
             }
             payment.setCvv(cvv);
 
