@@ -21,10 +21,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -58,14 +55,8 @@ public class BusinessServiceImpl implements BusinessService {
     }
 
     @Override
-    public List<String> findAllBusinessesOfAdmin(String username) {
-
-//        User admin = userRepository.findUserByUsername(username)
-//                .orElseThrow(() -> new RecordNotFoundException(Constants.USER_NOT_FOUND));
-//
-//        if (!admin.getRole().getRoleName().equals("ADMIN")) {
-//            throw new AuthenticationFailedException(Constants.INSUFFICIENT_PRIVILEGES);
-//        }
+    public List<String> findAllBusinessesOfAdmin(String username)
+            throws RecordNotFoundException,AuthenticationFailedException,NotCorrectDataException {
 
         User admin = utilitiesService.validateUser(username,Constants.ADMIN);
 
@@ -87,7 +78,8 @@ public class BusinessServiceImpl implements BusinessService {
     }
 
     @Override
-    public Page<ResponseSearchDTO> search(RequestSearchDTO searchRequest,String username) {
+    public Page<ResponseSearchDTO> search(RequestSearchDTO searchRequest,String username)
+            throws RecordNotFoundException,AuthenticationFailedException,NotCorrectDataException {
 
         User user = utilitiesService.validateUser(username,Constants.USER);
 
@@ -96,28 +88,8 @@ public class BusinessServiceImpl implements BusinessService {
         LocalDate checkInDate = LocalDate.parse(searchRequest.getCheckInDate(), formatter);
         LocalDate checkOutDate = LocalDate.parse(searchRequest.getCheckOutDate(), formatter);
 
-//        if (searchRequest.getCheckInDate()==null || searchRequest.getCheckOutDate()==null){
-//            throw new NotCorrectDataException(Constants.CHECKED_IN_OUT_DATES_NOT_FILLED);
-//        }
-//        LocalDate checkInDate;
-//        LocalDate checkOutDate;
-//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-//        try {
-//            checkInDate = LocalDate.parse(searchRequest.getCheckInDate(), formatter);
-//            checkOutDate = LocalDate.parse(searchRequest.getCheckOutDate(), formatter);
-//        } catch (Exception e) {
-//            throw new NotCorrectDataException(Constants.INVALID_DATE_FORMAT);
-//        }
-//
-//        if (checkInDate.isBefore(LocalDate.now()) || checkOutDate.isBefore(LocalDate.now())){
-//            throw new NotCorrectDataException(Constants.INCORRECT_CHECKED_IN_OUT_DATES);
-//
-//        }else if (checkOutDate.isBefore(checkInDate)){
-//            throw new NotCorrectDataException(Constants.INCORRECT_CHECKED_IN_OUT_DATES);
-//        }
-
         int page = searchRequest.getPage();
-        int size = 10; //constants?
+        int size = 7; //constants?
         Pageable pageable = PageRequest.of(page, size);
         Page<Businesses> businessesPage = businessRepository.findAll(pageable);
 
@@ -241,7 +213,8 @@ public class BusinessServiceImpl implements BusinessService {
 
     @Override
     @Transactional
-    public /*ResponseBusinessDTO*/String saveBusiness(RequestBusinessDTO requestBusinessDTO, String username) {
+    public /*ResponseBusinessDTO*/String saveBusiness(RequestBusinessDTO requestBusinessDTO, String username)
+    throws RecordAlreadyExistsException,RecordNotFoundException,AuthenticationFailedException,NotCorrectDataException,FileCouldNotBeSavedException {
 
 
         Optional<Businesses> doesBusinessExist = businessRepository.findByBusinessName(requestBusinessDTO.getName());
@@ -251,13 +224,6 @@ public class BusinessServiceImpl implements BusinessService {
         }
         Businesses businesses = businessMapper.mapToEntity(requestBusinessDTO);
 
-//        User user = userRepository.findUserByUsername(username)
-//                .orElseThrow(() -> new RecordNotFoundException(Constants.USER_NOT_FOUND));
-//
-//        if (!user.getRole().getRoleName().equals("ADMIN")) {
-//            throw new AuthenticationFailedException(Constants.INSUFFICIENT_PRIVILEGES);
-//        }
-
         User user = utilitiesService.validateUser(username,Constants.ADMIN);
 
         businesses.setAdmin(user);
@@ -265,27 +231,6 @@ public class BusinessServiceImpl implements BusinessService {
         String uploadDir = "C:\\Users\\USER\\Desktop\\SavedPhotos\\Businesses\\";
         String fileName = ValidationUtilities.transferImage(requestBusinessDTO.getImage(),uploadDir);
         businesses.setImage(fileName);
-
-//        MultipartFile image = requestBusinessDTO.getImage();
-//        if (image != null && !image.isEmpty()) {
-//            if (image.getSize() > 100 * 1024) {
-//                throw new FileCouldNotBeSavedException(Constants.FILE_TOO_LARGE);
-//            }
-//            try {
-//
-//                String uploadDir = "C:\\Users\\USER\\Desktop\\SavedPhotos\\Businesses\\";
-//
-//                String fileName = System.currentTimeMillis() + "_" + image.getOriginalFilename();
-//
-//                File file = new File(uploadDir + fileName);
-//
-//                image.transferTo(file);
-//
-//                businesses.setImage(fileName);
-//            } catch (IOException e) {
-//                throw new FileCouldNotBeSavedException(Constants.FILE_SAVE_FAILED);
-//            }
-//        }
 
         businesses.setTax(0.07); //default
         Businesses savedBusiness = businessRepository.save(businesses);

@@ -1,29 +1,22 @@
 package com.example.booking.endpoints;
 
-import com.example.booking.dataproviders.dto.businessDTOs.RequestBusinessDTO;
-import com.example.booking.dataproviders.dto.businessDTOs.ResponseBusinessDTO;
+import com.example.booking.core.exceptions.NotCorrectDataException;
+import com.example.booking.core.exceptions.RecordAlreadyExistsException;
+import com.example.booking.core.exceptions.RecordNotFoundException;
 import com.example.booking.dataproviders.dto.roomDTOs.RequestAvailableRoomsDTO;
 import com.example.booking.dataproviders.dto.roomDTOs.RequestRoomDTO;
 import com.example.booking.dataproviders.dto.roomDTOs.ResponseRoomDTO;
-import com.example.booking.dataproviders.dto.searchDTOs.RequestSearchDTO;
 import com.example.booking.dataproviders.services.RoomService;
-import com.example.booking.dataproviders.services.utilities.UtilitiesService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.springframework.context.support.DefaultMessageSourceResolvable;
-import org.springframework.core.MethodParameter;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @RestController
@@ -31,7 +24,7 @@ import java.util.stream.Collectors;
 @SecurityRequirement(name = "Bearer authentication")
 public class RoomController {
 
-    private RoomService roomService;
+    private final RoomService roomService;
 
     @GetMapping("/findAll")
     public ResponseEntity<List<ResponseRoomDTO>> findAll() {
@@ -45,34 +38,19 @@ public class RoomController {
     }
 
     @PostMapping("/getAvailableRooms")
-    public ResponseEntity<?> getAvailableRooms(@Valid @RequestBody RequestAvailableRoomsDTO requestAvailableRoomsDTO, Principal principal
-                                               /*BindingResult bindingResult*/) throws MethodArgumentNotValidException, NoSuchMethodException {
+    public ResponseEntity<Page<ResponseRoomDTO>> getAvailableRooms(@Valid @RequestBody RequestAvailableRoomsDTO requestAvailableRoomsDTO, Principal principal
+                                               /*BindingResult bindingResult*/) throws RecordNotFoundException {
 
-//        if (bindingResult.hasErrors()) {
-//            MethodParameter methodParameter = new MethodParameter(this.getClass().getMethod("getAvailableRooms", RequestAvailableRoomsDTO.class, BindingResult.class), 0);
-//            throw new MethodArgumentNotValidException(methodParameter, bindingResult);
-//        }
-
-//        SecurityContext context = SecurityContextHolder.getContext();
-//        String username = context.getAuthentication().getName();
-//        String username = UtilitiesService.getCurrentUsername();
         String username = principal.getName();
         return new ResponseEntity<>(roomService.getAllAvailableRooms(requestAvailableRoomsDTO,username), HttpStatus.OK);
 
     }
 
     @PostMapping("/save")
-    public ResponseEntity<?/*ResponseRoomDTO*/> saveRoom(@Valid @ModelAttribute RequestRoomDTO requestRoomDTO/*@Valid @RequestBody RequestRoomDTO requestRoomDTO*/
-    ,Principal principal/* BindingResult bindingResult*/) throws MethodArgumentNotValidException, NoSuchMethodException {
+    public ResponseEntity<String> saveRoom(@Valid @ModelAttribute RequestRoomDTO requestRoomDTO/*@Valid @RequestBody RequestRoomDTO requestRoomDTO*/
+    ,Principal principal/* BindingResult bindingResult*/) throws NotCorrectDataException,RecordNotFoundException, RecordAlreadyExistsException {
 
-//        if (bindingResult.hasErrors()) {
-//            MethodParameter methodParameter = new MethodParameter(this.getClass().getMethod("saveRoom", RequestRoomDTO.class, BindingResult.class), 0);
-//            throw new MethodArgumentNotValidException(methodParameter, bindingResult);
-//        }
 
-//        SecurityContext context = SecurityContextHolder.getContext();
-//        String username = context.getAuthentication().getName();
-//        String username = UtilitiesService.getCurrentUsername();
         String username = principal.getName();
         return new ResponseEntity<>(roomService.createRoom(requestRoomDTO,username), HttpStatus.CREATED);
 

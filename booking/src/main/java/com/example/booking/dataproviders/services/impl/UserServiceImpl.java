@@ -27,9 +27,9 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserInfoRepository userInfoRepository;
     private final RoleRepository roleRepository;
-    private UserInfoMapper userInfoMapper;
-    private UserMapper userMapper;
-    private AdminMapper adminMapper;
+    private final UserInfoMapper userInfoMapper;
+    private final UserMapper userMapper;
+    private final AdminMapper adminMapper;
 
     @Override
     public List<ResponseUserDTO> findAllUsers() {

@@ -15,8 +15,8 @@ import java.util.List;
 @AllArgsConstructor
 public class UserInfoServiceImpl implements UserInfoService {
 
-    private UserInfoRepository userInfoRepository;
-    private UserInfoMapper userInfoMapper;
+    private final UserInfoRepository userInfoRepository;
+    private final UserInfoMapper userInfoMapper;
 
     @Override
     public List<ResponseUserInfoDTO> findAllUserInfo() {

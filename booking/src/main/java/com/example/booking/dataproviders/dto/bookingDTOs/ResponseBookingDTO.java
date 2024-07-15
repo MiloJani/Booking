@@ -1,7 +1,5 @@
 package com.example.booking.dataproviders.dto.bookingDTOs;
 
-import com.example.booking.dataproviders.dto.paymentDTOs.RequestPaymentDTO;
-import com.example.booking.dataproviders.dto.paymentDTOs.ResponsePaymentDTO;
 import lombok.Getter;
 import lombok.Setter;
 

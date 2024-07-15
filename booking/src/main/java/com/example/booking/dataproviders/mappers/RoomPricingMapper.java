@@ -11,9 +11,6 @@ import com.example.booking.dataproviders.services.utilities.ValidationUtilities;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.util.List;
 
 @Component

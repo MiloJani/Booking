@@ -6,7 +6,6 @@ import com.example.booking.dataproviders.dto.roomDTOs.RequestAvailableRoomsDTO;
 import com.example.booking.dataproviders.dto.roomDTOs.RequestRoomDTO;
 import com.example.booking.dataproviders.dto.roomDTOs.ResponseRoomDTO;
 import com.example.booking.dataproviders.entities.Businesses;
-import com.example.booking.dataproviders.entities.RoomPricing;
 import com.example.booking.dataproviders.entities.Rooms;
 import com.example.booking.dataproviders.entities.User;
 import com.example.booking.dataproviders.mappers.RoomMapper;
@@ -21,11 +20,7 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -36,13 +31,13 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class RoomServiceImpl implements RoomService {
 
-    private RoomRepository roomRepository;
-    private BusinessRepository businessRepository;
-    private UserRepository userRepository;
-    private RoomMapper roomMapper;
+    private final RoomRepository roomRepository;
+    private final BusinessRepository businessRepository;
+    private final UserRepository userRepository;
+    private final RoomMapper roomMapper;
     private final RoomPricingServiceImpl roomPricingServiceImpl;
     private final RoomPricingRepository roomPricingRepository;
-    private UtilitiesService utilitiesService;
+    private final UtilitiesService utilitiesService;
 
 
     @Override
@@ -85,14 +80,11 @@ public class RoomServiceImpl implements RoomService {
 //    }
 
     @Override
-    public Page<ResponseRoomDTO> getAllAvailableRooms(RequestAvailableRoomsDTO requestAvailableRoomsDTO, String username) {
+    public Page<ResponseRoomDTO> getAllAvailableRooms(RequestAvailableRoomsDTO requestAvailableRoomsDTO, String username)
+    throws RecordNotFoundException{
 
         User user = userRepository.findUserByUsername(username)
                 .orElseThrow(() -> new RecordNotFoundException("User not found"));
-
-        if (!user.getRole().getRoleName().equals("USER")) {
-            throw new AuthenticationFailedException(Constants.INSUFFICIENT_PRIVILEGES);
-        }
 
         ValidationUtilities.validateDates(requestAvailableRoomsDTO.getCheckInDate()
                 ,requestAvailableRoomsDTO.getCheckOutDate());
@@ -102,14 +94,14 @@ public class RoomServiceImpl implements RoomService {
         LocalDate checkOutDate = LocalDate.parse(requestAvailableRoomsDTO.getCheckOutDate(), formatter);
 
         int size = 10;
-        Sort sort = Sort.by(Sort.Direction.ASC, "price"); // Default sort by price ascending
-        if ("desc".equalsIgnoreCase(requestAvailableRoomsDTO.getSortDirection())) {
-            sort = Sort.by(Sort.Direction.DESC, requestAvailableRoomsDTO.getSortBy());
-        } else if ("asc".equalsIgnoreCase(requestAvailableRoomsDTO.getSortDirection())) {
-            sort = Sort.by(Sort.Direction.ASC, requestAvailableRoomsDTO.getSortBy());
-        }
+//        Sort sort = Sort.by(Sort.Direction.ASC, "price"); // Default sort by price ascending
+//        if ("desc".equalsIgnoreCase(requestAvailableRoomsDTO.getSortDirection())) {
+//            sort = Sort.by(Sort.Direction.DESC, requestAvailableRoomsDTO.getSortBy());
+//        } else if ("asc".equalsIgnoreCase(requestAvailableRoomsDTO.getSortDirection())) {
+//            sort = Sort.by(Sort.Direction.ASC, requestAvailableRoomsDTO.getSortBy());
+//        }
 
-        Pageable pageable = PageRequest.of(requestAvailableRoomsDTO.getPage(), size, sort);
+        Pageable pageable = PageRequest.of(requestAvailableRoomsDTO.getPage(), size/*, sort*/);
 
         List<Long> availableRoomIds = roomRepository.findAvailableRoomIds(
                 requestAvailableRoomsDTO.getBusinessId(),
@@ -170,32 +162,12 @@ public class RoomServiceImpl implements RoomService {
 
     }
 
-//    public double calculateTotalPrice(Rooms room, LocalDate checkInDate, LocalDate checkOutDate) {
-//        double totalPrice = 0.0;
-//
-//        LocalDate currentDate = checkInDate;
-//        while (!currentDate.isAfter(checkOutDate)) {
-//            DayOfWeek dayOfWeek = currentDate.getDayOfWeek();
-//            Optional<RoomPricing> optionalRoomPricing = roomPricingRepository.findByRoomAndDayOfWeek(room, dayOfWeek);
-//            if (optionalRoomPricing.isPresent()) {
-//                totalPrice += optionalRoomPricing.get().getPrice();
-//            } else {
-//                throw new RecordNotFoundException(Constants.ROOM_PRICING_NOT_FOUND + dayOfWeek);
-//            }
-//            currentDate = currentDate.plusDays(1);
-//        }
-//
-//        return totalPrice;
-//    }
-
-
-
-
 
 
     @Override
     @Transactional
-    public /*ResponseRoomDTO*/ String createRoom(RequestRoomDTO roomDTO,String username) {
+    public /*ResponseRoomDTO*/ String createRoom(RequestRoomDTO roomDTO,String username)
+    throws NotCorrectDataException,RecordNotFoundException,RecordAlreadyExistsException{
 
         if (Integer.parseInt(roomDTO.getCapacity())<0 || Double.parseDouble(roomDTO.getPrice())<0 ){
             throw new NotCorrectDataException(Constants.INVALID_DATA);
@@ -213,34 +185,9 @@ public class RoomServiceImpl implements RoomService {
         User user = userRepository.findUserByUsername(username)
                 .orElseThrow(() -> new RecordNotFoundException(Constants.USER_NOT_FOUND));
 
-        if (!user.getRole().getRoleName().equals("ADMIN")) {
-            throw new AuthenticationFailedException(Constants.INSUFFICIENT_PRIVILEGES);
-        }
-
         String uploadDir = "C:\\Users\\USER\\Desktop\\SavedPhotos\\Rooms\\";
         String fileName = ValidationUtilities.transferImage(roomDTO.getImage(),uploadDir);
         rooms.setImage(fileName);
-
-//        MultipartFile image = roomDTO.getImage();
-//        if (image != null && !image.isEmpty()) {
-//            if (image.getSize() > 100 * 1024) {
-//                throw new FileCouldNotBeSavedException(Constants.FILE_TOO_LARGE);
-//            }
-//            try {
-//
-//                String uploadDir = "C:\\Users\\USER\\Desktop\\SavedPhotos\\Rooms\\";
-//
-//                String fileName = System.currentTimeMillis() + "_" + image.getOriginalFilename();
-//
-//                File file = new File(uploadDir + fileName);
-//
-//                image.transferTo(file);
-//
-//                rooms.setImage(fileName);
-//            } catch (IOException e) {
-//                throw new FileCouldNotBeSavedException(Constants.FILE_SAVE_FAILED);
-//            }
-//        }
 
         rooms.setBusinesses(businesses);
 

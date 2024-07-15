@@ -4,4 +4,5 @@
                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
     <!--    <include file="classpath:/db/changelog/buildTables.sql" relativeToChangelogFile="false" />-->
 <!--    <include file="classpath:/db/changelog/changelog.xml"/>-->
+    <!--    <include file="classpath:/db/changelog/changelogV2.xml"/>-->
 </databaseChangeLog>

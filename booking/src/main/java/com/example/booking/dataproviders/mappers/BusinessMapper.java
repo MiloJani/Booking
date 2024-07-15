@@ -12,10 +12,6 @@ import com.example.booking.dataproviders.services.utilities.ValidationUtilities;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
-
-import java.io.IOException;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -61,8 +57,6 @@ public class BusinessMapper {
         businesses.setFreeParking(Boolean.parseBoolean(requestBusinessDTO.getFreeParking()));
         businesses.setFreeWifi(Boolean.parseBoolean(requestBusinessDTO.getFreeWifi()));
         businesses.setInsidePool(Boolean.parseBoolean(requestBusinessDTO.getInsidePool()));
-//        businesses.setTax(requestBusinessDTO.getTax());
-//        businesses.setImage(requestBusinessDTO.getImage());
 
         return businesses;
     }
@@ -98,28 +92,5 @@ public class BusinessMapper {
 
         return responseSearchDTO;
     }
-
-//    private String getBusinessImageUrl(String imageFileName) {
-//        if (imageFileName != null) {
-//            String fileUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
-//                    .path("/images/businesses/")
-//                    .path(imageFileName)
-//                    .toUriString();
-//            return fileUrl;
-//        }
-//        return null;
-//    }
-
-//    private String getBusinessImageUrl(String imageFileName) {
-//        //            String serverIp = NetworkUtils.getServerIpAddress();
-//        String serverIp = "192.168.1.32";
-//        if (imageFileName != null) {
-//            String fileUrl = "http://" + serverIp + ":8080/SavedPhotos/Businesses/" + imageFileName;
-//            return fileUrl;
-//        }else {
-//            return "http://" + serverIp + ":8080/SavedPhotos/Businesses/default.png";
-//        }
-//    }
-
 
 }

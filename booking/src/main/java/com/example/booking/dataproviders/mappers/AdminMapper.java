@@ -11,7 +11,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class AdminMapper {
 
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
+
     public ResponseAdminDTO mapToDto(User user) {
 
         ResponseAdminDTO dto = new ResponseAdminDTO();

@@ -1,0 +1,219 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <!-- Table: ROLES -->
+    <changeSet author="MiloTheFox" id="create-table-ROLES">
+        <createTable tableName="ROLES">
+            <column name="ROLE_ID" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="ROLE_NAME" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Table: USER_INFO -->
+    <changeSet author="MiloTheFox" id="create-table-USER_INFO">
+        <createTable tableName="USER_INFO">
+            <column name="USER_ID" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="ADDRESS" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="REGISTER_DATE" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="DISCOUNT_POINTS" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Table: USERS -->
+    <changeSet author="MiloTheFox" id="create-table-USERS">
+        <createTable tableName="USERS">
+            <column name="USER_ID" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="USERNAME" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="EMAIL" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="PASSWORD" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PHONE_NUMBER" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ROLE_ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="USERS" baseColumnNames="ROLE_ID" constraintName="FK_USERS_ROLE_ID" referencedTableName="ROLES" referencedColumnNames="ROLE_ID"/>
+    </changeSet>
+
+    <!-- Table: BUSINESS -->
+    <changeSet author="MiloTheFox" id="create-table-BUSINESS">
+        <createTable tableName="BUSINESS">
+            <column name="BUSINESS_ID" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="BUSINESS_NAME" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="FREE_PARKING" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="FREE_WIFI" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="INSIDE_POOL" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="FREE_BREAKFAST" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="IMAGE" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="TAX" type="DOUBLE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ADMIN_ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="BUSINESS" baseColumnNames="ADMIN_ID" constraintName="FK_BUSINESS_ADMIN_ID" referencedTableName="USERS" referencedColumnNames="USER_ID"/>
+    </changeSet>
+
+    <!-- Table: ROOM -->
+    <changeSet author="MiloTheFox" id="create-table-ROOM">
+        <createTable tableName="ROOM">
+            <column name="ROOM_ID" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="ROOM_NAME" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CAPACITY" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PRICE" type="DOUBLE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="DESCRIPTION" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ROOM_TYPE" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="IMAGE" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="BUSINESS_ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="ROOM" baseColumnNames="BUSINESS_ID" constraintName="FK_ROOM_BUSINESS_ID" referencedTableName="BUSINESS" referencedColumnNames="BUSINESS_ID"/>
+    </changeSet>
+
+    <!-- Table: ROOM_PRICING -->
+    <changeSet author="MiloTheFox" id="create-table-ROOM_PRICING">
+        <createTable tableName="ROOM_PRICING">
+            <column name="ROOM_PRICING_ID" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="DAY_OF_WEEK" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PRICE" type="DOUBLE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ROOM_ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="ROOM_PRICING" baseColumnNames="ROOM_ID" constraintName="FK_ROOM_PRICING_ROOM_ID" referencedTableName="ROOM" referencedColumnNames="ROOM_ID"/>
+    </changeSet>
+
+    <!-- Table: BOOKING -->
+    <changeSet author="MiloTheFox" id="create-table-BOOKING">
+        <createTable tableName="BOOKING">
+            <column name="BOOKING_ID" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="BOOKING_DATE" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CHECK_IN_DATE" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CHECK_OUT_DATE" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="NO_OF_ADULTS" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="NO_OF_CHILDREN" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="STATUS" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="USER_ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ROOM_ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="BOOKING" baseColumnNames="USER_ID" constraintName="FK_BOOKING_USER_ID" referencedTableName="USERS" referencedColumnNames="USER_ID"/>
+        <addForeignKeyConstraint baseTableName="BOOKING" baseColumnNames="ROOM_ID" constraintName="FK_BOOKING_ROOM_ID" referencedTableName="ROOM" referencedColumnNames="ROOM_ID"/>
+    </changeSet>
+
+    <!-- Table: PAYMENT -->
+    <changeSet author="MiloTheFox" id="create-table-PAYMENT">
+        <createTable tableName="PAYMENT">
+            <column name="PAYMENT_ID" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="CARD_NUMBER" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CARD_HOLDER_NAME" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="EXPIRATION_YEAR" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="EXPIRATION_MONTH" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CVV" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="BOOKING_ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="PAYMENT" baseColumnNames="BOOKING_ID" constraintName="FK_PAYMENT_BOOKING_ID" referencedTableName="BOOKING" referencedColumnNames="BOOKING_ID"/>
+    </changeSet>
+
+    <!-- Table: TOKEN_BLACKLIST -->
+    <changeSet author="MiloTheFox" id="create-table-TOKEN_BLACKLIST">
+        <createTable tableName="TOKEN_BLACKLIST">
+            <column name="TOKEN" type="VARCHAR(255)">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="EXPIRY_DATE" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

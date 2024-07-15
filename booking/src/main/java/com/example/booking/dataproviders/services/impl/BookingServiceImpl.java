@@ -1,6 +1,7 @@
 package com.example.booking.dataproviders.services.impl;
 
 import com.example.booking.constants.Constants;
+import com.example.booking.core.exceptions.AuthenticationFailedException;
 import com.example.booking.core.exceptions.NotCorrectDataException;
 import com.example.booking.core.exceptions.RecordAlreadyExistsException;
 import com.example.booking.core.exceptions.RecordNotFoundException;
@@ -12,14 +13,9 @@ import com.example.booking.dataproviders.services.BookingService;
 import com.example.booking.dataproviders.services.utilities.UtilitiesService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+
 import org.springframework.stereotype.Service;
 
-
-import java.time.LocalDate;
-import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,14 +24,12 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class BookingServiceImpl implements BookingService {
 
-    private BookingRepository bookingRepository;
-    private BookingMapper bookingMapper;
-    private PaymentRepository paymentRepository;
-    private PaymentMapper paymentMapper;
-    private UserRepository userRepository;
-    private UserInfoRepository userInfoRepository;
-    private RoomRepository roomRepository;
-    private UtilitiesService utilitiesService;
+    private final BookingRepository bookingRepository;
+    private final BookingMapper bookingMapper;
+    private final PaymentMapper paymentMapper;
+    private final UserInfoRepository userInfoRepository;
+    private final RoomRepository roomRepository;
+    private final UtilitiesService utilitiesService;
 
     @Override
     public List<ResponseBookingDTO> findAllBookings() {
@@ -59,9 +53,8 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public List<ResponseBookingHistoryDTO> getBookingHistory(String username) {
-//        User user = userRepository.findUserByUsername(username).orElseThrow(
-//                () -> new RecordNotFoundException(Constants.USER_NOT_FOUND));
+    public List<ResponseBookingHistoryDTO> getBookingHistory(String username) throws RecordNotFoundException, AuthenticationFailedException {
+
         User user = utilitiesService.validateUser(username,Constants.USER);
         List<Booking> bookings = bookingRepository.findByUser(user);
 
@@ -84,16 +77,8 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public /*ResponseBookingDTO*/BookingResponseDTO saveBooking(RequestBookingDTO requestBookingDTO,String username) {
-
-
-
-//        User user = userRepository.findUserByUsername(username)
-//                .orElseThrow(() -> new RecordNotFoundException(Constants.USER_NOT_FOUND));
-//
-//        if (!user.getRole().getRoleName().equals("USER")) {
-//            throw new AuthenticationFailedException(Constants.INSUFFICIENT_PRIVILEGES);
-//        }
+    public /*ResponseBookingDTO*/BookingResponseDTO saveBooking(RequestBookingDTO requestBookingDTO,String username)
+            throws RecordNotFoundException,RecordAlreadyExistsException,AuthenticationFailedException,NotCorrectDataException {
 
         User user = utilitiesService.validateUser(username,Constants.USER);
 
@@ -110,17 +95,6 @@ public class BookingServiceImpl implements BookingService {
         if (!overlappingBookings.isEmpty()) {
             throw new RecordAlreadyExistsException(Constants.BOOKING_ALREADY_EXISTS);
         }
-
-//        if (booking.getBookingDate().isEqual(booking.getCheckInDate()) ||
-//                booking.getBookingDate().isEqual(booking.getCheckOutDate()) ||
-//                (booking.getBookingDate().isAfter(booking.getCheckInDate()) &&
-//                        booking.getBookingDate().isBefore(booking.getCheckOutDate()))){
-//            booking.setStatus("Checked In");
-//        }else if (booking.getBookingDate().isBefore(booking.getCheckInDate())){
-//            booking.setStatus("Booked");
-//        }else {
-//            booking.setStatus("Checked Out");
-//        }
 
         utilitiesService.setStatus(booking);
         

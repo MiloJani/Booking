@@ -51,13 +51,6 @@ public class RoomPricingServiceImpl implements RoomPricingService {
     @Transactional
     public WeekRoomPricingResponseDTO getWeekRoomPricings(RequestRoomPricingsDTO roomPricingsDTO, String username) {
 
-//        User user = userRepository.findUserByUsername(username)
-//                .orElseThrow(() -> new RecordNotFoundException(Constants.USER_NOT_FOUND));
-//
-//        if (!user.getRole().getRoleName().equals("USER")) {
-//            throw new AuthenticationFailedException(Constants.INSUFFICIENT_PRIVILEGES);
-//        }
-
         User user = utilitiesService.validateUser(username,Constants.USER);
 
         int discountPoints = user.getUserInfo().getDiscountPoints();
@@ -87,23 +80,6 @@ public class RoomPricingServiceImpl implements RoomPricingService {
                 })
                 .collect(Collectors.toList());
 
-//        LocalDate today = LocalDate.now();
-//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM");
-//
-//        List<ResponseRoomsPricingDTO> responsePricings = today.datesUntil(today.plusDays(7))
-//                .map(date -> {
-//                    RoomPricing pricing = roomPricings.stream()
-//                            .filter(p -> p.getDayOfWeek() == date.getDayOfWeek())
-//                            .findFirst()
-//                            .orElseThrow(() -> new RecordNotFoundException(Constants.ROOM_PRICING_NOT_FOUND + date.getDayOfWeek()));
-//                    return new ResponseRoomsPricingDTO(date.format(formatter), pricing.getPrice());
-//                })
-//                .collect(Collectors.toList());
-
-//        return new WeekRoomPricingResponseDTO(
-//                responsePricings, room.getBusinesses().getTax(), discount,room.getDescription(),
-//                room.getBusinesses().isFreeParking(),room.getBusinesses().isFreeWifi(),
-//                room.getBusinesses().isInsidePool(),room.getBusinesses().isFreeBreakfast());
 
         return roomPricingMapper.mapToWeekRoomPricingResponseDTO(room,responsePricings,discount);
     }

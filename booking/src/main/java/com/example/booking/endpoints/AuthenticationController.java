@@ -1,10 +1,11 @@
 package com.example.booking.endpoints;
 
+import com.example.booking.core.exceptions.AuthenticationFailedException;
+import com.example.booking.core.exceptions.RecordNotFoundException;
 import com.example.booking.dataproviders.dto.authDTOs.AuthenticationRequest;
 import com.example.booking.dataproviders.dto.authDTOs.AuthenticationResponse;
 import com.example.booking.dataproviders.dto.authDTOs.LogoutDTO;
 import com.example.booking.dataproviders.dto.authDTOs.ResponseLogoutDTO;
-import com.example.booking.dataproviders.dto.searchDTOs.RequestSearchDTO;
 import com.example.booking.dataproviders.dto.userDTOs.RequestAdminDTO;
 import com.example.booking.dataproviders.dto.userDTOs.RequestUserDTO;
 import com.example.booking.dataproviders.dto.userDTOs.ResponseAdminDTO;
@@ -13,20 +14,13 @@ import com.example.booking.dataproviders.services.AuthenticationService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.springframework.context.support.DefaultMessageSourceResolvable;
-import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @RestController
-//@CrossOrigin(origins = "http://192.168.1.78:3000")
 @CrossOrigin(origins = "http://192.168.1.66:3000")
 @SecurityRequirement(name = "Bearer authentication")
 @RequestMapping("/api/auth")
@@ -35,9 +29,9 @@ public class AuthenticationController {
     private final AuthenticationService authenticationService;
 
     @PostMapping("/authenticate")
-    public ResponseEntity<?/*AuthenticationResponse*/> authenticate(
+    public ResponseEntity<AuthenticationResponse> authenticate(
             @Valid @RequestBody AuthenticationRequest request
-            ) throws MethodArgumentNotValidException, NoSuchMethodException {
+            ) throws RecordNotFoundException, AuthenticationFailedException {
 
         return ResponseEntity.ok(authenticationService.authenticate(request));
     }
@@ -57,10 +51,5 @@ public class AuthenticationController {
         ResponseLogoutDTO responseLogoutDTO = authenticationService.logout(logoutDTO.getToken());
         return ResponseEntity.ok(responseLogoutDTO);
     }
-//    @PostMapping("/logout")
-//    public ResponseEntity<Void> logout(@RequestBody String token) {
-//        authenticationService.logout(token);
-//        return ResponseEntity.ok().build();
-//    }
 
 }

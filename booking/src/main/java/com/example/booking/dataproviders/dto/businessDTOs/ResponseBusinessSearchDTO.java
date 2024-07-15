@@ -1,10 +1,8 @@
 package com.example.booking.dataproviders.dto.businessDTOs;
 
-import com.example.booking.dataproviders.dto.roomDTOs.ResponseRoomDTO;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Set;
 
 @Setter
 @Getter

@@ -1,28 +1,21 @@
 package com.example.booking.endpoints;
 
+import com.example.booking.core.exceptions.*;
 import com.example.booking.dataproviders.dto.businessDTOs.RequestBusinessDTO;
 import com.example.booking.dataproviders.dto.businessDTOs.ResponseBusinessDTO;
 import com.example.booking.dataproviders.dto.searchDTOs.RequestSearchDTO;
 import com.example.booking.dataproviders.dto.searchDTOs.ResponseSearchDTO;
 import com.example.booking.dataproviders.services.BusinessService;
-import com.example.booking.dataproviders.services.utilities.UtilitiesService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.springframework.context.support.DefaultMessageSourceResolvable;
-import org.springframework.core.MethodParameter;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*")
 @AllArgsConstructor
@@ -50,11 +43,8 @@ public class BusinessController {
     }
 
     @GetMapping("/admin")
-    public ResponseEntity<List<String>> findAllBusinessesOfAdmin(Principal principal) {
+    public ResponseEntity<List<String>> findAllBusinessesOfAdmin(Principal principal) throws RecordNotFoundException, AuthenticationFailedException, NotCorrectDataException {
 
-//            SecurityContext context = SecurityContextHolder.getContext();
-//            String username = context.getAuthentication().getName();
-//        String username = UtilitiesService.getCurrentUsername();
         String username = principal.getName();
             List<String> businesses = businessService.findAllBusinessesOfAdmin(username);
             return new ResponseEntity<>(businesses, HttpStatus.OK);
@@ -62,33 +52,20 @@ public class BusinessController {
     }
 
     @PostMapping("/search")
-    public ResponseEntity<?/*Page<ResponseSearchDTO>*/> searchBookings(@Valid @RequestBody RequestSearchDTO searchRequest,Principal principal
-                                                                  /*BindingResult bindingResult*/) throws MethodArgumentNotValidException, NoSuchMethodException {
-//        if (bindingResult.hasErrors()) {
-//            MethodParameter methodParameter = new MethodParameter(this.getClass().getMethod("searchBookings", RequestSearchDTO.class, BindingResult.class), 0);
-//            throw new MethodArgumentNotValidException(methodParameter, bindingResult);
-//        }
+    public ResponseEntity<Page<ResponseSearchDTO>> searchBookings(@Valid @RequestBody RequestSearchDTO searchRequest,Principal principal
+                                                                  /*BindingResult bindingResult*/) throws RecordNotFoundException,AuthenticationFailedException,NotCorrectDataException {
 
-//        String username = UtilitiesService.getCurrentUsername();
         String username = principal.getName();
         Page<ResponseSearchDTO> searchResults = businessService.search(searchRequest,username);
         return ResponseEntity.ok(searchResults);
     }
 
     @PostMapping("/save")
-    public ResponseEntity<?/*ResponseBusinessDTO*/> saveBusiness(@Valid @ModelAttribute RequestBusinessDTO requestBusinessDTO,Principal principal
+    public ResponseEntity<String> saveBusiness(@Valid @ModelAttribute RequestBusinessDTO requestBusinessDTO,Principal principal
                                                             /*,BindingResult bindingResult*/
-            /*@Valid @RequestBody RequestBusinessDTO requestBusinessDTO*/) throws MethodArgumentNotValidException, NoSuchMethodException {
-
-//        if (bindingResult.hasErrors()) {
-//            MethodParameter methodParameter = new MethodParameter(this.getClass().getMethod("saveBusiness", RequestBusinessDTO.class, BindingResult.class), 0);
-//            throw new MethodArgumentNotValidException(methodParameter, bindingResult);
-//        }
+            /*@Valid @RequestBody RequestBusinessDTO requestBusinessDTO*/) throws RecordAlreadyExistsException,RecordNotFoundException,AuthenticationFailedException,NotCorrectDataException, FileCouldNotBeSavedException {
 
 
-//        SecurityContext context = SecurityContextHolder.getContext();
-//        String username = context.getAuthentication().getName();
-//        String username = UtilitiesService.getCurrentUsername();
         String username = principal.getName();
         return new ResponseEntity<>(businessService.saveBusiness(requestBusinessDTO,username), HttpStatus.CREATED);
 

@@ -39,11 +39,16 @@ public class PaymentMapper {
 
             payment.setExpirationMonth(expirationMonth);
             payment.setExpirationYear(expirationYear);
+
+            int cvv = requestPaymentDTO.getCvv();
+            if (String.valueOf(cvv).length() != 4) {
+                throw new NotCorrectDataException("CVV must be exactly 4 digits long.");
+            }
+            payment.setCvv(cvv);
+
         } catch (NumberFormatException | DateTimeException e) {
             throw new NotCorrectDataException("Invalid expiration date. Please ensure the date is in MM/YY format and is valid.");
         }
-
-        payment.setCvv(requestPaymentDTO.getCvv());
 
         return payment;
     }

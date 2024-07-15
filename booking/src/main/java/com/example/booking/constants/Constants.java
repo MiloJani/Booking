@@ -2,6 +2,7 @@ package com.example.booking.constants;
 
 public class Constants {
 
+    //General data
     public static final String USER = "USER";
     public static final String ADMIN = "ADMIN";
     public static final String ROOM = "Rooms";
@@ -27,9 +28,6 @@ public class Constants {
     //Booking related
     public static final String BOOKING_NOT_FOUND = "Booking not found";
     public static final String BOOKING_ALREADY_EXISTS = "Booking already exists";
-
-    // Role related constants
-    public static final String ROLE_NOT_FOUND = "Role not found";
 
     // File related constants
     public static final String FILE_TOO_LARGE = "File size must be less than or equal to 100KB";

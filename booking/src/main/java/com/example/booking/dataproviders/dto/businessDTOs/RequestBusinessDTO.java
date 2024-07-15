@@ -32,5 +32,4 @@ public class RequestBusinessDTO {
 
 //    private Double tax=0.07;
 
-//    private Long adminId;
 }

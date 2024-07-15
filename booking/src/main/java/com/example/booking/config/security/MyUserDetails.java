@@ -24,6 +24,8 @@ public class MyUserDetails implements UserDetails {
         listOfAllAccess.add(new SimpleGrantedAuthority(userRole.getRoleName()));
 
         return listOfAllAccess;
+
+//        return Collections.singleton(new SimpleGrantedAuthority(userRole.getRoleName()));
     }
 
     @Override
